@@ -7,7 +7,6 @@
 #include <stdarg.h>
 #include <signal.h>
 
-#include "bytes.h"
 #include "sm3.h"
 #include "FIO/fio.h"
 

@@ -1,4 +1,6 @@
 #acc:
+    event_socket()
+##
     app_event()
     type_search()
 #rsc:

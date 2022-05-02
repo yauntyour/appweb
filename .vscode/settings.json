@@ -1,3 +1,13 @@
 {
-    "C_Cpp.errorSquiggles": "Enabled"
+    "C_Cpp.errorSquiggles": "Enabled",
+    "files.associations": {
+        "*.html": "html",
+        "system_error": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "compare": "cpp",
+        "functional": "cpp",
+        "type_traits": "cpp"
+    }
 }

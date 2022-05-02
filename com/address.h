@@ -1,6 +1,6 @@
 #ifndef __ADDRESS__H__
 #define __ADDRESS__H__
-#include "../ctrl/app_socket.h"
+#include "app_socket.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,9 +10,10 @@ extern "C"
 {
 #endif //_cplusplus
 
-typedef struct IPv_address{
-    
-} IPv_address;
+typedef struct IPv4_address{
+    socket_t socket;
+    sockaddr_in address;
+} IPv4_addr_t;
 
 #ifdef _cplusplus
 }

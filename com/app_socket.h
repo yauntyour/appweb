@@ -14,6 +14,7 @@ typedef SOCKET socket_t;
 
 #ifndef _WIN32 // not _WIN32
 
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/in.h> // sockaddr_in, inet_addr
 #include <arpa/inet.h>
@@ -41,19 +42,34 @@ int shutdown_socket(socket_t sock)
 #endif
 }
 
-void set_nonblocking(socket_t sock, bool nonblocking)
+void set_nonblocking(socket_t sock, unsigned int nonblocking)
 {
 #ifdef _WIN32
+#ifdef _cplusplus
     auto flags = nonblocking ? 1UL : 0UL;
     ioctlsocket(sock, FIONBIO, &flags);
 #else
+    if (nonblocking == 1)
+    {
+        unsigned long flags = 1;
+        ioctlsocket(sock, FIONBIO, &flags);
+    }
+    else
+    {
+        unsigned long flags = 0;
+        ioctlsocket(sock, FIONBIO, &flags);
+    }
+#endif //_cplusplus
+#else
+#ifdef _cplusplus
     auto flags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL,
           nonblocking ? (flags | O_NONBLOCK) : (flags & (~O_NONBLOCK)));
+#endif //_cplusplus
 #endif
 }
 
-bool get_error()
+int get_error()
 {
 #ifdef _WIN32
     return WSAGetLastError();
@@ -76,6 +92,8 @@ int WS_clean()
     return 0;
 }
 
+#ifdef _cplusplus
+
 class WSInit
 {
 public:
@@ -86,6 +104,8 @@ public:
     ~WSInit() { WSACleanup(); }
 };
 static WSInit wsinit_; // 全局变量，windows下程序执行时构造初始化，退出时析构
+
+#endif //_cplusplus
 
 #endif
 #endif //!__APP_SOCKET__H__
