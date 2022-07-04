@@ -25,8 +25,6 @@ def netcat():
             break
         client.sendall(msg.encode('utf-8'))
     client.close()
-
-
 def UDPclientSend():
     if len(sys.argv) == 1:
         sys.argv.append(input("Host:"))

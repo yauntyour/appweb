@@ -6,12 +6,12 @@
             "command": "K:\\X64\\MSYS2\\mingw64\\bin\\g++.exe",
             "args": [
                 "-g",
-                "${workspaceFolder}\\com\\main.cpp",
+                "${workspaceFolder}\\main.cpp",
                 "-o",
                 "${workspaceFolder}\\out\\app.exe",
                 "-fexec-charset=UTF-8",
                 "-lwsock32",
-                "-lpthread",
+                "-lpthread"
             ],
             "options": {
                 "cwd": "${workspaceFolder}\\out"

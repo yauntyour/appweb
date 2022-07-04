@@ -1,12 +1,13 @@
+#pragma once
 #ifndef __BYTES__H__
 #define __BYTES__H__
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C"
 {
-#endif //_cplusplus
+#endif //__cplusplus
     typedef char byter;
     typedef struct bytes
     {
@@ -21,8 +22,8 @@ extern "C"
         memset((*buf).data, 0, size);
         return (*buf).length;
     }
-#ifdef _cplusplus
-}
+#ifdef __cplusplus
+};
 
-#endif //_cplusplus
+#endif //__cplusplus
 #endif //!__BYTES__H__

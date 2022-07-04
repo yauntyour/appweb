@@ -1,10 +1,14 @@
+#pragma once
 #ifndef __APP_SOCKET__H__
 #define __APP_SOCKET__H__
 #ifdef _WIN32
 
-#include <io.h>
+#include "unistd.h"
+#ifndef _WINDOWS_
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#endif  //!_WINDOWS_
+#include <windows.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -45,7 +49,7 @@ int shutdown_socket(socket_t sock)
 void set_nonblocking(socket_t sock, unsigned int nonblocking)
 {
 #ifdef _WIN32
-#ifdef _cplusplus
+#ifdef __cplusplus
     auto flags = nonblocking ? 1UL : 0UL;
     ioctlsocket(sock, FIONBIO, &flags);
 #else
@@ -59,13 +63,13 @@ void set_nonblocking(socket_t sock, unsigned int nonblocking)
         unsigned long flags = 0;
         ioctlsocket(sock, FIONBIO, &flags);
     }
-#endif //_cplusplus
+#endif //__cplusplus
 #else
-#ifdef _cplusplus
+#ifdef __cplusplus
     auto flags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL,
           nonblocking ? (flags | O_NONBLOCK) : (flags & (~O_NONBLOCK)));
-#endif //_cplusplus
+#endif //__cplusplus
 #endif
 }
 
@@ -92,7 +96,7 @@ int WS_clean()
     return 0;
 }
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 
 class WSInit
 {
@@ -105,7 +109,7 @@ public:
 };
 static WSInit wsinit_; // 全局变量，windows下程序执行时构造初始化，退出时析构
 
-#endif //_cplusplus
+#endif //__cplusplus
 
 #endif
 #endif //!__APP_SOCKET__H__

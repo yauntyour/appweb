@@ -1,0 +1,97 @@
+[
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "socket",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "socket",
+        "description": "socket",
+        "detail": "socket",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "ping",
+        "importPath": "ping3",
+        "description": "ping3",
+        "isExtraImport": true,
+        "detail": "ping3",
+        "documentation": {}
+    },
+    {
+        "label": "ping",
+        "importPath": "ping3",
+        "description": "ping3",
+        "isExtraImport": true,
+        "detail": "ping3",
+        "documentation": {}
+    },
+    {
+        "label": "netcat",
+        "kind": 2,
+        "importPath": "out.nc",
+        "description": "out.nc",
+        "peekOfCode": "def netcat():\n    if len(sys.argv) == 1:\n        sys.argv.append(input(\"Host:\"))\n        sys.argv.append(input(\"Port:\"))\n        sys.argv.append(input(\"recvBufflen:\"))\n    response = ping(str(sys.argv[2]))\n    print(str(response)+\"ms\")\n    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    client.connect((str(sys.argv[2]), int(sys.argv[3])))\n    while True:",
+        "detail": "out.nc",
+        "documentation": {}
+    },
+    {
+        "label": "UDPclientSend",
+        "kind": 2,
+        "importPath": "out.nc",
+        "description": "out.nc",
+        "peekOfCode": "def UDPclientSend():\n    if len(sys.argv) == 1:\n        sys.argv.append(input(\"Host:\"))\n        sys.argv.append(input(\"Port:\"))\n        sys.argv.append(input(\"data:\"))\n    client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)\n    client.connect((str(sys.argv[2]), int(sys.argv[3])))\n    client.sendall(sys.argv[4].encode('utf-8'))\n    print(\"send over\")",
+        "detail": "out.nc",
+        "documentation": {}
+    },
+    {
+        "label": "Server",
+        "kind": 2,
+        "importPath": "out.nc",
+        "description": "out.nc",
+        "peekOfCode": "def Server():\n    if len(sys.argv) == 1:\n        sys.argv.append(input(\"Host:\"))\n        sys.argv.append(input(\"Port:\"))\n        sys.argv.append(input(\"recvBufflen:\"))\n        sys.argv.append(input(\"Server socketTypes:\"))\n    if sys.argv.__len__() == 5:\n        print(\"set socket type:STREAM\")\n        sys.argv.append(\"STREAM\")\n    if sys.argv[5] == \"DGRAM\":",
+        "detail": "out.nc",
+        "documentation": {}
+    },
+    {
+        "label": "listen255",
+        "kind": 2,
+        "importPath": "out.nc",
+        "description": "out.nc",
+        "peekOfCode": "def listen255():\n    print(\"set socket type:DGRAM\")\n    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n    sock.bind((\"0.0.0.255\",9995))\n    #sock.listen()\n    #c,addr = sock.accept()\n    while True:\n        #data = sock.recv(int(sys.argv[4]))\n        #print(addr,\"connect.\")\n        data = sock.recv(int(sys.argv[4]))",
+        "detail": "out.nc",
+        "documentation": {}
+    },
+    {
+        "label": "netcat",
+        "kind": 2,
+        "importPath": "out.netools",
+        "description": "out.netools",
+        "peekOfCode": "def netcat():\n    if len(sys.argv) == 1:\n        sys.argv.append(input(\"Host:\"))\n        sys.argv.append(input(\"Port:\"))\n        sys.argv.append(input(\"recvBufflen:\"))\n    response = ping(str(sys.argv[2]))\n    print(str(response)+\"ms\")\n    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    client.connect((str(sys.argv[2]), int(sys.argv[3])))\n    while True:",
+        "detail": "out.netools",
+        "documentation": {}
+    }
+]

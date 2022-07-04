@@ -1,102 +1,99 @@
+#pragma once
 #ifndef __APP_RSC__H__
 #define __APP_RSC__H__
 
-#include "../com/app_socket.h"
-#include "../acc/app_acc.h"
+//#include "../acc/app_acc.h"
 #include "../com/com.h"
 
+#include "mime_type.h"
+#include "request.h"
+//#include "inc_zlib.h"
+
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <signal.h>
 #include <pthread.h>
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C"
 {
-#endif //_cplusplus
-
-    struct response_event
+#endif //__cplusplus
+    int app_on(acc_event *ev, urlc_t urlc[], size_t len)
     {
-        char header[128];
-        time_t time;
-        const char *content_type;
-        char *url;
-    };
-    typedef response_event rsp;
-
-    /*return NULL to success*/
-    typedef void* (*func_t)(acc_event *event, req *request);
-
-    /*singal function must return a SIG_DFL or SIG_IGN singal*/
-    typedef int (*singal_t)(acc_event *event, req *request);
-
-#define  SGL_DEF 1
-#define  SGL_ING 0
-    struct _onEvent_
-    {
-        struct _onEvent_ *next;
-        singal_t sgl;
-        func_t func;
-    };
-    typedef _onEvent_ onEvent;
-
-    extern int app_on(acc_event *event, singal_t sgl, func_t func)
-    {
-        onEvent ev;
-        ev.func = func;
-        ev.sgl = sgl;
-        ev.next = NULL;
-        onEvent *eve = &((*event).event_list);
-        while (eve->next)
+        if ((*ev).line == NULL)
         {
-            eve = eve->next;
-            if (eve->next == NULL)
+            (*ev).line = (urlc_t *)calloc(len, sizeof(urlc_t));
+            for (size_t i = 0; i < len; i++)
             {
-                eve->next = &ev;
+                for (size_t j = 0; j <= 8; i++)
+                {
+                    if (urlc[i].req_model == j)
+                    {
+                        (*ev).line[i] = urlc[i];
+                        break;
+                    }
+                    else if (j == 8)
+                    {
+                        urlc[i].req_model = -1;
+                        (*ev).line[i] = urlc[i];
+                        break;
+                    }
+                }
             }
+            (*ev).line_length = len;
+            return 0;
         }
-    };
-    struct __rsc_arg__
-    {
-        acc_event *event;
-        req *request;
-        onEvent *ev;
-    };
-    typedef __rsc_arg__ __rsc_arg__;
-    extern void *__rsc__(void *arg)
-    {
-        __rsc_arg__ *ra = (__rsc_arg__*)arg;
-        if ((*(*ra).ev).sgl((*ra).event,(*ra).request) == SGL_DEF)
+        else
         {
-            return (*(*ra).ev).func((*ra).event,(*ra).request);
+            urlc_t *temp = (urlc_t *)calloc(len + (*ev).line_length, sizeof(urlc_t));
+
+            for (size_t i = 0; i < (*ev).line_length; i++)
+            {
+                temp[i] = (*ev).line[i];
+            }
+
+            for (size_t i = 0; i < len; i++)
+            {
+                temp[i + (*ev).line_length] = urlc[i];
+            }
+
+            (*ev).line_length += len;
+            (*ev).line = temp;
+            return 0;
         }
     }
-    extern int app_rsc(acc_event *event)
+
+    void *__search__(void *req)
+    {
+        req_t *request = (req_t *)req;
+
+        bytes_create(&(request->data), MAX_RECV_BUF);
+        recv(request->addr.socket, request->data.data, MAX_RECV_BUF, 0);
+        req_create(request);
+        
+        printf(request->url);
+
+        return NULL;
+    }
+
+    int app_rsc(acc_event *ev)
     {
         while (1)
         {
             for (size_t i = 0; i < MAX_CONN; i++)
             {
-                if ((*event).acc_list[i]._stat_ == 1)
+                if (ev->acc_list[i]._stat_ == stat_rsc)
                 {
-                    onEvent *eve = &((*event).event_list);
-                    while (eve->next)
-                    {
-                        __rsc_arg__ arg;
-                        arg.event = event;
-                        arg.request = &((*event).acc_list[i]);
-                        arg.ev = eve;
-                        pthread_t th;
-                        if (pthread_create(&th, NULL, __rsc__, &arg) != 0)
-                        {
-                            return -1;
-                        }
-                        eve = eve->next;
-                    }
+                    pthread_t t;
+                    pthread_create(&t,NULL,__search__,&(ev->acc_list[i]));
+                    pthread_join(t,NULL);
                 }
             }
         }
     }
-#ifdef _cplusplus
-}
-#endif //_cplusplus
+
+#ifdef __cplusplus
+};
+#endif //__cplusplus
 #endif //!__APP_RSC__H__

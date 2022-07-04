@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __MIME_TYPE__H__
 #define __MIME_TYPE__H__
 
@@ -7,13 +8,13 @@
 
 #include "http.h"
 /*
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C"
 {
-#endif //_cplusplus
+#endif //__cplusplus
 */
 
-typedef struct mime_type_dict_t
+typedef struct mime_type_dict
 {
     const char *file_type,
         *mime_type;
@@ -530,8 +531,8 @@ extern const char *mime_type(const char *file_typeName)
     return NULL;
 }
 /*
-#ifdef _cplusplus
-}
-#endif //_cplusplus
+#ifdef __cplusplus
+};
+#endif //__cplusplus
 */
 #endif //!__MIME_TYPE__H__

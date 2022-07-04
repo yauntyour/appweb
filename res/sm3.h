@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _SM3_H_
 #define _SM3_H_
 

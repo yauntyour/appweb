@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __APP_RES__H__
 #define __APP_RES__H__
 #include <stdio.h>
@@ -10,81 +11,70 @@
 #include "sm3.h"
 #include "FIO/fio.h"
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C"
 {
-#endif //_cplusplus
+#endif //__cplusplus
 #define END_FILESET -1
 
-    struct file_path
+    typedef struct file_path
     {
         char *path;
         char *mode;
         unsigned int active;
-    };
-    typedef file_path file_path;
-
-    struct file_stat
-    {
-        int ifend;
-        char *open_mode;
-        unsigned int active;
-    };
-    typedef file_stat file_stat;
-
-    struct _file
+    }filepath_t;
+    typedef struct _file
     {
         Asfio fp; //异步文件指针
         bytes data;
-        char *path;
         unsigned char hash[32]; //基于国密sm3的hash计算
-        file_stat stat;
+        filepath_t file;
         pthread_rwlock_t _luck_;
-    };
-    typedef _file _file_;
+        int ifend;
+    }_file_;
     typedef _file_ *fileset;
 
-    extern int fileset_create(fileset *set, size_t size)
+    int fileset_create(fileset *set, size_t size)
     {
         *set = (fileset)calloc(size, sizeof(_file));
-        (*set)[size - 1].stat.ifend = END_FILESET;
+        (*set)[size - 1].ifend = END_FILESET;
         return 0;
     }
 
-    extern int fileopen(_file_ *f, char *filepath, char *mode, unsigned int active)
+    int fileopenc(_file_ *f, char *filepath, char *mode, unsigned int active)
     {
         f->fp = Asfio_create(filepath, mode);
         if (f->fp.Stream == NULL)
         {
             return -1;
         }
-        f->path = filepath;
-        f->stat.active = active;
-        f->stat.open_mode = mode;
+        f->file.path = filepath;
+        f->file.active = active;
+        f->file.mode = mode;
         pthread_rwlock_init(&(f->_luck_), NULL);
         return 0;
     }
 
-    extern int fileopen(_file_ *f, file_path path)
+    int fileopen(_file_ *f, filepath_t path)
     {
         (*f).fp = Asfio_create(path.path, path.mode);
         if (f->fp.Stream == NULL)
         {
             return -1;
         }
-        (*f).path = path.path;
-        (*f).stat.active = path.active;
-        (*f).stat.open_mode = path.mode;
+        (*f).file.path = path.path;
+        (*f).file.active = path.active;
+        (*f).file.mode = path.mode;
         pthread_rwlock_init(&((*f)._luck_), NULL);
         return 0;
     }
 
-    extern size_t fileset_length(fileset *filetree)
+    size_t fileset_length(fileset *filetree)
     {
         size_t i = 0;
         while (1)
         {
-            if ((*filetree)[i].stat.ifend == END_FILESET)
+            if ((*filetree)[i].ifend == END_FILESET)
             {
                 break;
             }
@@ -98,7 +88,7 @@ extern "C"
 #define __ACTIVE__ 1
 #define __INACTIVE__ 0
 
-    extern int res_in(fileset *filetree, file_path *file_list, size_t num)
+    int res_in(fileset *filetree, filepath_t *file_list, size_t num)
     {
         fileset_create(filetree, num);
         size_t i = 0;
@@ -108,7 +98,7 @@ extern "C"
             {
                 return i + 1;
             }
-            if ((*filetree)[i].stat.ifend == END_FILESET)
+            if ((*filetree)[i].ifend == END_FILESET)
             {
                 break;
             }
@@ -116,17 +106,17 @@ extern "C"
         }
         return 0;
     }
-    extern int res_cache(fileset *filetree, size_t length)
+    int res_cache(fileset *filetree, size_t length)
     {
         size_t i = 0;
         while (1)
         {
-            if ((*filetree)[i].stat.active == 0)
+            if ((*filetree)[i].file.active == 0)
             {
                 continue;
             }
             Asfio_readcall(&((*filetree)[i].fp), &((*filetree)[i].data));
-            if ((*filetree)[i].stat.ifend == END_FILESET)
+            if ((*filetree)[i].ifend == END_FILESET)
             {
                 break;
             }
@@ -134,7 +124,7 @@ extern "C"
         }
         return 0;
     }
-    extern void *res_active(void *arg)
+    void *res_active(void *arg)
     {
         fileset *filetree = (fileset *)arg;
         while (1)
@@ -143,7 +133,7 @@ extern "C"
             for (size_t i = 0; i < fileset_length(filetree); i++)
             {
                 pthread_rwlock_wrlock(&(*filetree)[i]._luck_);
-                if ((*filetree)[i].stat.active != __ALWAYS__)
+                if ((*filetree)[i].file.active != __ALWAYS__)
                 {
                     free((*filetree)[i].data.data);
                 }
@@ -157,7 +147,7 @@ extern "C"
         -first --path
         -second --hash
     */
-    extern _file_ *res_search(fileset *set, ...)
+    _file_ *res_search(fileset *set, ...)
     {
         va_list va;
         va_start(va, set);
@@ -169,12 +159,12 @@ extern "C"
         while (1)
         {
             pthread_rwlock_rdlock(&(*set)[i]._luck_);
-            if ((*set)[i].hash == hash || (*set)[i].path == path)
+            if ((*set)[i].hash == hash || (*set)[i].file.path == path)
             {
                 pthread_rwlock_unlock(&(*set)[i]._luck_);
                 return &((*set)[i]);
             }
-            if ((*set)[i].stat.ifend == END_FILESET)
+            if ((*set)[i].ifend == END_FILESET)
             {
                 pthread_rwlock_unlock(&(*set)[i]._luck_);
                 break;
@@ -185,7 +175,7 @@ extern "C"
         return NULL;
         va_end(va);
     }
-    extern int res_awake(_file_ *file)
+    int res_awake(_file_ *file)
     {
         return Asfio_readcall(&((*file).fp), &((*file).data));
     }
@@ -198,7 +188,7 @@ extern "C"
     };
     typedef __res_args__ res_args;
 
-    extern pthread_t app_res(fileset *filetree, file_path *file_list, size_t num)
+    pthread_t app_res(fileset *filetree, file_path *file_list, size_t num)
     {
         size_t i = res_in(filetree, file_list, num);
         if (i != 0)
@@ -221,8 +211,8 @@ extern "C"
     }
 
 // end
-#ifdef _cplusplus
-}
-#endif //_cplusplus
+#ifdef __cplusplus
+};
+#endif //__cplusplus
 
 #endif //!__APP_RES__H__

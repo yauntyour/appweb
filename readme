@@ -23,7 +23,3 @@
     cache();
 ##
     app_res();
-#ctrl
-    main function
-    thread_control
-    app()
