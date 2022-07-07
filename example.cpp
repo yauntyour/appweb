@@ -1,19 +1,25 @@
 #include <iostream>
 #include <stdio.h>
 #include <time.h>
-#include "com/com.h"
-#include <pthread.h>
+#include "appweb.h"
+//#include <pthread.h>
 
 FUNC_CB_C(func)
 {
-    printf((*request).data.data);
     send((*request).addr.socket, "HTTP/1.1 200 OK \r\n  hello,world\r\n\0\0\0", 33, 0);
     close_socket((*request).addr.socket);
 };
-
 int main(int argc, char const *argv[])
 {
-    
+    /*
+    pthread_t t1;
+    test1(&t1, NULL);
+    pthread_t t2 = test4(NULL);
+    pthread_join(t1, NULL);
+    */
+
+    RSP_404_HTML = "<h1>404 Not Found.</h1>";
+
     WS_Init();
     acc_event ev;
     ev.port = 10000;
@@ -21,12 +27,17 @@ int main(int argc, char const *argv[])
     app_event_init(&ev);
 
     urlc_t urlc[] = {
-        {"",func,-1}
+        {"/home", func, Type_GET},
     };
-    app_on(&ev,urlc,1);
-    
-    
+    app_on(&ev, urlc, 1);
 
+    pthread_t acc, rsc;
+    app_acc(&acc, &ev);
+    app_rsc(&rsc, &ev);
+    pthread_join(acc, NULL);
+    pthread_join(rsc, NULL);
+
+    app_event_free(&ev);
     WS_clean();
     /*
         bytes buf;

@@ -6,7 +6,7 @@
             "command": "K:\\X64\\MSYS2\\mingw64\\bin\\g++.exe",
             "args": [
                 "-g",
-                "${workspaceFolder}\\main.cpp",
+                "${workspaceFolder}\\example.cpp",
                 "-o",
                 "${workspaceFolder}\\out\\app.exe",
                 "-fexec-charset=UTF-8",

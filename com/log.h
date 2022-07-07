@@ -8,12 +8,10 @@
 
 #define LOGFILE(filepath, LOG_file_p) LOG_file_p = fopen(filepath, "a+")
 #define LOG(format, ...)                  \
-    fprintf(stdout, format, __VA_ARGS__); \
-    fflush(stdout)
+    fprintf(stdout, format, __VA_ARGS__)
 #define LOGFILEOUT(LOG_file_p, format, ...)   \
     fprintf(LOG_file_p, format, __VA_ARGS__); \
-    fprintf(stdout, format, __VA_ARGS__);     \
-    fflush(stdout)
+    fprintf(stdout, format, __VA_ARGS__)
 
 char *getTMUTC(char *buf,int len,int UTCoffset,const char * _Format,time_t *time)
 {

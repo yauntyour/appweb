@@ -21,78 +21,106 @@ extern "C"
 #endif //__cplusplus
     int app_on(acc_event *ev, urlc_t urlc[], size_t len)
     {
-        if ((*ev).line == NULL)
+        if (ev->line_length == 0)
         {
-            (*ev).line = (urlc_t *)calloc(len, sizeof(urlc_t));
+            ev->line = (urlc_t *)calloc(len, sizeof(urlc_t));
             for (size_t i = 0; i < len; i++)
             {
-                for (size_t j = 0; j <= 8; i++)
+                if (urlc[i].req_model < 0 || urlc[i].req_model > 8)
                 {
-                    if (urlc[i].req_model == j)
-                    {
-                        (*ev).line[i] = urlc[i];
-                        break;
-                    }
-                    else if (j == 8)
-                    {
-                        urlc[i].req_model = -1;
-                        (*ev).line[i] = urlc[i];
-                        break;
-                    }
+                    urlc[i].req_model = 9;
                 }
+                ev->line[i] = urlc[i];
             }
-            (*ev).line_length = len;
-            return 0;
         }
         else
         {
-            urlc_t *temp = (urlc_t *)calloc(len + (*ev).line_length, sizeof(urlc_t));
-
-            for (size_t i = 0; i < (*ev).line_length; i++)
+            urlc_t *temp = (urlc_t *)calloc(len + ev->line_length, sizeof(urlc_t));
+            for (size_t i = 0; i < ev->line_length; i++)
             {
-                temp[i] = (*ev).line[i];
+                temp[i] = ev->line[i];
             }
-
             for (size_t i = 0; i < len; i++)
             {
-                temp[i + (*ev).line_length] = urlc[i];
+                temp[ev->line_length + i] = urlc[i];
             }
-
-            (*ev).line_length += len;
-            (*ev).line = temp;
-            return 0;
+            free(ev->line);
+            ev->line = temp;
         }
+        ev->line_length += len;
+        return 0;
+    }
+    typedef struct __search__arg
+    {
+        urlc_t *line;
+        size_t line_length;
+        req_t *request;
+    } __search__arg_t;
+
+    void *__search__(void *arg)
+    {
+        __search__arg_t *a = (__search__arg_t *)arg;
+
+        bytes_create(&(a->request->data), MAX_RECV_BUF);
+        recv(a->request->addr.socket, a->request->data.data, MAX_RECV_BUF, 0);
+        req_create(a->request);
+
+        for (size_t i = 0; i < a->line_length; i++)
+        {
+            if (a->line[i].req_model != -1)
+            {
+                if (strcmp(a->line[i].url, a->request->url) == 0)
+                {
+                    if (strcmp(a->request->req_model, Type_req[a->line[i].req_model]) == 0)
+                    {
+                        a->line[i]._func_(a->request);
+                    }
+                    else
+                    {
+                        goto __rsp404__;
+                    }
+                }
+                else
+                {
+                    goto __rsp404__;
+                }
+            }
+            else
+            {
+            __rsp404__:
+                rsp_404(a->request);
+            }
+        }
+        a->request->_stat_ = stat_acc;
+        pthread_exit(NULL);
     }
 
-    void *__search__(void *req)
+    void *_rsc(void *arg)
     {
-        req_t *request = (req_t *)req;
-
-        bytes_create(&(request->data), MAX_RECV_BUF);
-        recv(request->addr.socket, request->data.data, MAX_RECV_BUF, 0);
-        req_create(request);
-        
-        printf(request->url);
-
-        return NULL;
-    }
-
-    int app_rsc(acc_event *ev)
-    {
+        acc_event *ev = (acc_event *)arg;
         while (1)
         {
             for (size_t i = 0; i < MAX_CONN; i++)
             {
-                if (ev->acc_list[i]._stat_ == stat_rsc)
+                if (ev->acc_list[i]._stat_ == stat_rsc && ev->acc_list[i]._stat_ != stat_deal)
                 {
+                    ev->acc_list[i]._stat_ = stat_deal;
                     pthread_t t;
-                    pthread_create(&t,NULL,__search__,&(ev->acc_list[i]));
-                    pthread_join(t,NULL);
+                    __search__arg_t a;
+                    a.line = ev->line;
+                    a.line_length = ev->line_length;
+                    a.request = &(ev->acc_list[i]);
+                    pthread_create(&t, NULL, __search__, &a);
+                    pthread_detach(t);
                 }
             }
         }
+        pthread_exit(NULL);
     }
-
+    int app_rsc(pthread_t *rsc_thread, acc_event *event)
+    {
+        return pthread_create(rsc_thread, NULL, _rsc, event);
+    }
 #ifdef __cplusplus
 };
 #endif //__cplusplus

@@ -8,6 +8,10 @@
         "string_view": "cpp",
         "compare": "cpp",
         "functional": "cpp",
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "istream": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "typeinfo": "cpp"
     }
 }

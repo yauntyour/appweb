@@ -12,15 +12,16 @@
 #define HOME_DIR "./home/"
 
 #define MAX_CONN 128
-#define MAX_RECV_BUF 8 * 1024
+#define MAX_RECV_BUF 2048
 #define MAX_LINE 32
 #define MAX_TIME_LEN 32
 
 #define stat_acc 0
 #define stat_rsc 1
+#define stat_deal 2
 
 #define IOS_charset_UTF8 0xff
-#define  __error__  -1
+#define __error__ -1
 
 typedef struct request_event
 {
@@ -37,10 +38,11 @@ typedef int (*func_cb)(req_t *);
 
 /*
 necessary arg:
-char* url -URL path with on();
-func_cb _func_ -deal by function;
-int req_model,
-    rsp_code;
+ char* url -URL path with on();
+ func_cb _func_ -deal by function;
+ int req_model,
+     rsp_code;
+if req_model == -1,
 */
 typedef struct urlc
 {
@@ -59,18 +61,6 @@ typedef struct acc_event
     urlc_t *line;
     int UTCoffset;
 } acc_event;
-
-#ifndef __APP_ACC__H__
-#include "../acc/app_acc.h"
-#endif //!__APP_ACC__H__
-#ifndef __APP_RSC__H__
-#include "../rsc/app_rsc.h"
-#endif //!__APP_RES__H__
-
-#ifndef __APP_RES__H__
-#include "../res/app_res.h"
-#endif //!__APP_RES__H__
-
 #define FUNC_CB_C(__name__) int __name__(req_t *request)
 
 #endif //!__COM__H__

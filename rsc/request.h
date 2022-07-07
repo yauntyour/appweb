@@ -22,9 +22,9 @@ extern "C"
     }
     int rsp_404(req_t *request)
     {
-        size_t len = 27 + strlen(RSP_404_HTML) + 1;
+        size_t len = 29 + strlen(RSP_404_HTML) + 1;
         char *buf = (char *)calloc(len, sizeof(char));
-        sprintf(buf, "HTTP/1.1 404 Not Found\r\n%s", RSP_404_HTML);
+        sprintf(buf, "HTTP/1.1 404 Not Found\r\n\r\n%s", RSP_404_HTML);
         send((*request).addr.socket, buf, len, 0);
         close_socket((*request).addr.socket);
         return 404;

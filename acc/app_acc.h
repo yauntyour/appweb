@@ -55,17 +55,24 @@ extern "C"
 
         (*event).line = NULL;
         (*event).line_length = 0;
+
         return 0;
     }
-
-    int app_acc(acc_event *event)
+    int app_event_free(acc_event *event)
     {
-        printf("Server start at X.X.X.X:%d\n", event->port);
+        close_socket(event->tcpip.socket);
+        close_socket(event->udpip.socket);
+        return 0;
+    }
+    void *_acc(void *arg)
+    {
+        acc_event *event = (acc_event *)arg;
+        LOG("Server start at host:[http://localhost:%d]\n",event->port);
         while (1)
         {
             req_t request;
             int sizeof_req = sizeof(request.addr.address);
-            
+
             request.addr.socket = accept(event->tcpip.socket, (sockaddr *)&request.addr.address, &sizeof_req);
 
             if (request.addr.socket == INVALID_SOCKET)
@@ -73,7 +80,7 @@ extern "C"
                 int err = get_error();
                 if (err != 10035)
                 {
-                    printf("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+                    LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
                 }
                 _sleep(100);
             }
@@ -81,7 +88,7 @@ extern "C"
             {
                 time(&(request.time));
                 char buf[MAX_TIME_LEN];
-                LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &(request.time)), inet_ntoa(request.addr.address.sin_addr));
+                LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &(request.time)), inet_ntoa(request.addr.address.sin_addr), request.addr.address.sin_port);
             START:
                 for (size_t i = 0; i < MAX_CONN; i++)
                 {
@@ -93,15 +100,19 @@ extern "C"
                     }
                     else if (i == MAX_CONN - 1)
                     {
-                        printf("CONNECT MAX: %d", MAX_CONN);
+                        LOG("CONNECT MAX: %d", MAX_CONN);
                         send(request.addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
-                        sleep(500);
+                        _sleep(500);
                         goto START;
                     }
                 }
             }
         }
-        return 0;
+        pthread_exit(NULL);
+    }
+    int app_acc(pthread_t *th, acc_event *event)
+    {
+        return pthread_create(th, NULL, _acc, event);
     }
 #ifdef __cplusplus
 };
