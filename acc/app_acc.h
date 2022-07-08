@@ -73,8 +73,8 @@ extern "C"
             req_t request;
             int sizeof_req = sizeof(request.addr.address);
 
+            __Accept__:
             request.addr.socket = accept(event->tcpip.socket, (sockaddr *)&request.addr.address, &sizeof_req);
-
             if (request.addr.socket == INVALID_SOCKET)
             {
                 int err = get_error();
@@ -82,7 +82,7 @@ extern "C"
                 {
                     LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
                 }
-                _sleep(100);
+                goto __Accept__;
             }
             else
             {

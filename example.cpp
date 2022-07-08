@@ -6,7 +6,8 @@
 
 FUNC_CB_C(func)
 {
-    send((*request).addr.socket, "HTTP/1.1 200 OK \r\n  hello,world\r\n\0\0\0", 33, 0);
+    char *html = "HTTP/1.1 200 OK \r\n\r\n<h1>Hello,World</h1>\r\n \0\0\0";
+    send((*request).addr.socket, html, strlen(html), 0);
     close_socket((*request).addr.socket);
 };
 int main(int argc, char const *argv[])

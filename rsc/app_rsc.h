@@ -69,9 +69,9 @@ extern "C"
         {
             if (a->line[i].req_model != -1)
             {
-                if (strcmp(a->line[i].url, a->request->url) == 0)
+                if (a->request->url != NULL && strcmp(a->line[i].url, a->request->url) == 0)
                 {
-                    if (strcmp(a->request->req_model, Type_req[a->line[i].req_model]) == 0)
+                    if (a->request->req_model != NULL && strcmp(a->request->req_model, Type_req[a->line[i].req_model]) == 0)
                     {
                         a->line[i]._func_(a->request);
                     }
