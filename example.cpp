@@ -13,23 +13,21 @@ FUNC_CB_C(func)
 int main(int argc, char const *argv[])
 {
     /*
-    pthread_t t1;
-    test1(&t1, NULL);
-    pthread_t t2 = test4(NULL);
-    pthread_join(t1, NULL);
-    */
-
-    RSP_404_HTML = "<h1>404 Not Found.</h1>";
-
     WS_Init();
     acc_event ev;
     ev.port = 10000;
     ev.UTCoffset = 8;
     app_event_init(&ev);
+    */
 
+    appweb app(8, 10000);
     urlc_t urlc[] = {
         {"/home", func, Type_GET},
     };
+    app.on(urlc,1);
+    app.start(flag_wait);
+    delete &app;
+    /*
     app_on(&ev, urlc, 1);
 
     pthread_t acc, rsc;
@@ -40,6 +38,7 @@ int main(int argc, char const *argv[])
 
     app_event_free(&ev);
     WS_clean();
+    */
     /*
         bytes buf;
         char *text1 = "POST /index.php HTTP/1.1\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2\r\n\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\r\nAccept-Language: zh-cn,zh;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\nReferer: http://localhost/\r\nContent-Length: 25\r\nContent-Type: application/x-www-form-urlencoded\r\nusername=aa&password=1234";

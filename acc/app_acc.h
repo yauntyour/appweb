@@ -47,7 +47,6 @@ extern "C"
             printf("%s: listen TCP %s:%d failed. %s\n", __func__, "localhost", (*event).port, strerror(errno));
             return -1;
         }
-
         for (size_t i = 0; i < MAX_CONN; i++)
         {
             (*event).acc_list[i]._stat_ = stat_acc;
@@ -56,6 +55,9 @@ extern "C"
         (*event).line = NULL;
         (*event).line_length = 0;
 
+        signal(SIGINT,sighandler);
+        signal(SIGTERM,sighandler);
+        
         return 0;
     }
     int app_event_free(acc_event *event)
@@ -67,13 +69,13 @@ extern "C"
     void *_acc(void *arg)
     {
         acc_event *event = (acc_event *)arg;
-        LOG("Server start at host:[http://localhost:%d]\n",event->port);
+        LOG("Server start at host:[http://localhost:%d]\n", event->port);
         while (1)
         {
             req_t request;
             int sizeof_req = sizeof(request.addr.address);
 
-            __Accept__:
+        __Accept__:
             request.addr.socket = accept(event->tcpip.socket, (sockaddr *)&request.addr.address, &sizeof_req);
             if (request.addr.socket == INVALID_SOCKET)
             {

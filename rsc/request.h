@@ -26,6 +26,7 @@ extern "C"
         char *buf = (char *)calloc(len, sizeof(char));
         sprintf(buf, "HTTP/1.1 404 Not Found\r\n\r\n%s", RSP_404_HTML);
         send((*request).addr.socket, buf, len, 0);
+        free(buf);
         close_socket((*request).addr.socket);
         return 404;
     }

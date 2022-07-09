@@ -12,7 +12,15 @@
 #define Content_type_image_ 2
 #define Content_type_application_ 0
 
-static char *RSP_404_HTML = "{\"404\":\"404 Not Found!\"}";
+static char *RSP_404_HTML = "<!DOCTYPE html>"
+                   "<head>"
+                   "<title>404</title>"
+                   "</head>"
+                   "<body>"
+                   "<h1 style='text-align:center'>"
+                   "HTTP 404 Not Found"
+                   "</h1>"
+                   "</body>";
 
 enum TYPE_REQ
 {
