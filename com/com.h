@@ -13,7 +13,6 @@
 
 #define MAX_CONN 128
 #define MAX_RECV_BUF 2048
-#define MAX_LINE 32
 
 #define MAX_TIME_LEN 32
 
@@ -37,7 +36,7 @@ typedef struct request_event
     time_t time;
     IPv4_addr_t addr;
     bytes data;
-    char *reqline[MAX_LINE];
+    char **reqline;
     char *req_model;
     char *url;
     int _stat_;

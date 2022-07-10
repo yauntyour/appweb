@@ -17,10 +17,20 @@ char *getTMUTC(char *buf,int len,int UTCoffset,const char * _Format,time_t *time
 {
     memset(buf,0,len);
     tm t;
+#ifdef _WIN32
     gmtime_s(&t, time);
+#else
+    gmtime_r(time,&t);
+#endif
     t.tm_hour += UTCoffset;
     //Sun Jun 05 01:32:50(UTC) 2022 
-    strftime(buf,len,_Format,&t);
-    return buf;
+    if (strftime(buf, len, _Format, &t) != 0)
+    {
+        return buf;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 #endif //!__LOG__H__

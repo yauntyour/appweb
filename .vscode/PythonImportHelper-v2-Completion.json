@@ -93,5 +93,14 @@
         "peekOfCode": "def netcat():\n    if len(sys.argv) == 1:\n        sys.argv.append(input(\"Host:\"))\n        sys.argv.append(input(\"Port:\"))\n        sys.argv.append(input(\"recvBufflen:\"))\n    response = ping(str(sys.argv[2]))\n    print(str(response)+\"ms\")\n    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    client.connect((str(sys.argv[2]), int(sys.argv[3])))\n    while True:",
         "detail": "out.netools",
         "documentation": {}
+    },
+    {
+        "label": "msg",
+        "kind": 5,
+        "importPath": "out.netools",
+        "description": "out.netools",
+        "peekOfCode": "msg = \"GET /home HTTP/1.1\\r\\nHost: localhost\\r\\nUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2\\r\\n\\r\\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\\r\\nAccept-Language: zh-cn,zh;q=0.5\\r\\nAccept-Encoding: gzip, deflate\\r\\nConnection: keep-alive\\r\\nReferer: http://localhost/\\r\\nContent-Length: 25\\r\\nContent-Type: application/x-www-form-urlencoded\\r\\nusername=aa&password=1234\"\ndef netcat():\n    if len(sys.argv) == 1:\n        sys.argv.append(input(\"Host:\"))\n        sys.argv.append(input(\"Port:\"))\n        sys.argv.append(input(\"recvBufflen:\"))\n    response = ping(str(sys.argv[2]))\n    print(str(response)+\"ms\")\n    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    client.connect((str(sys.argv[2]), int(sys.argv[3])))",
+        "detail": "out.netools",
+        "documentation": {}
     }
 ]

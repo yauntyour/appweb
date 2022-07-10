@@ -63,8 +63,10 @@ extern "C"
 
         bytes_create(&(a->request->data), MAX_RECV_BUF);
         recv(a->request->addr.socket, a->request->data.data, MAX_RECV_BUF, 0);
-        req_create(a->request);
-
+        if(req_create(a->request) == -1)
+        {
+            rsp_404(a->request);
+        }
         for (size_t i = 0; i < a->line_length; i++)
         {
             if (a->line[i].req_model != -1)

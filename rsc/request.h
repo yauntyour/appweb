@@ -11,9 +11,9 @@ extern "C"
     {
         if (request->data.data != NULL)
         {
-            split((*request).data.data, "\r\n", (*request).reqline);
-            char *dest[3] = {0};
-            split((*request).reqline[0], " ", dest);
+            if(split((*request).data.data,(*request).data.length, "\r\n", &(*request).reqline) == 0) return -1;
+            char **dest;
+            if(split((*request).reqline[0],strlen((*request).reqline[0]), " ", &dest) == 0) return -1;
             (*request).req_model = dest[0];
             (*request).url = dest[1];
             return 0;

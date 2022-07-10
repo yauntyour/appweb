@@ -19,8 +19,8 @@ int main(int argc, char const *argv[])
     ev.UTCoffset = 8;
     app_event_init(&ev);
     */
-
-    appweb app(8, 10000);
+    
+    appweb app(8, 9999);
     urlc_t urlc[] = {
         {"/home", func, Type_GET},
     };
@@ -40,19 +40,11 @@ int main(int argc, char const *argv[])
     WS_clean();
     */
     /*
-        bytes buf;
-        char *text1 = "POST /index.php HTTP/1.1\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2\r\n\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\r\nAccept-Language: zh-cn,zh;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\nReferer: http://localhost/\r\nContent-Length: 25\r\nContent-Type: application/x-www-form-urlencoded\r\nusername=aa&password=1234";
-        char *text2 = "POST /index.php HTTP/1.1";
-        bytes_create(&buf,25);
-        memcpy(buf.data,text2,25);
-
-        char* arr[128] = {0};
-        printf("%d\n",split(buf.data," ",arr));
-
-        for (size_t i = 0; i < 128; i++)
-        {
-            if(arr[i] != NULL) printf("%s\n",arr[i]);
-        }
+    bytes buf;
+    char *text1 = "POST /index.php HTTP/1.1\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2\r\n\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\r\nAccept-Language: zh-cn,zh;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\nReferer: http://localhost/\r\nContent-Length: 25\r\nContent-Type: application/x-www-form-urlencoded\r\nusername=aa&password=1234";
+    char *text2 = "POST /index.php HTTP/1.1";
+    bytes_create(&buf,25);
+    memcpy(buf.data,text2,25);
     */
     return 0;
 }

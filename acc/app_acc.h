@@ -27,10 +27,13 @@ extern "C"
 
         (*event).tcpip.address.sin_port = htons((*event).port);
         (*event).udpip.address.sin_port = htons((*event).port + 1);
-
+#ifdef _WIN32
         (*event).tcpip.address.sin_addr.S_un.S_addr = INADDR_ANY;
         (*event).udpip.address.sin_addr.S_un.S_addr = INADDR_ANY;
-
+#else
+        (*event).tcpip.address.sin_addr.s_addr = INADDR_ANY;
+        (*event).udpip.address.sin_addr.s_addr = INADDR_ANY;
+#endif
         if (bind((*event).tcpip.socket, (const sockaddr *)&(*event).tcpip.address, sizeof((*event).tcpip.address)) == SOCKET_ERROR)
         {
             printf("%s: bind TCP %s:%d failed. %s\n", __func__, "localhost", (*event).port, strerror(errno));
@@ -73,17 +76,27 @@ extern "C"
         while (1)
         {
             req_t request;
+#ifdef _WIN32
             int sizeof_req = sizeof(request.addr.address);
-
+#else
+            socklen_t sizeof_req = sizeof(request.addr.address);
+#endif
         __Accept__:
             request.addr.socket = accept(event->tcpip.socket, (sockaddr *)&request.addr.address, &sizeof_req);
             if (request.addr.socket == INVALID_SOCKET)
             {
                 int err = get_error();
+#ifdef _WIN32
                 if (err != 10035)
                 {
                     LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
                 }
+#else
+                if (err != EAGAIN)
+                {
+                    LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+                }
+#endif
                 goto __Accept__;
             }
             else
@@ -104,7 +117,6 @@ extern "C"
                     {
                         LOG("CONNECT MAX: %d", MAX_CONN);
                         send(request.addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
-                        _sleep(500);
                         goto START;
                     }
                 }

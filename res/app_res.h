@@ -129,7 +129,11 @@ extern "C"
         fileset *filetree = (fileset *)arg;
         while (1)
         {
-            _sleep(5 * 60 * 1000);
+#ifdef _WIN32
+            _sleep(5 * 60 *1000);
+#else
+            sleep(5 * 60);
+#endif
             for (size_t i = 0; i < fileset_length(filetree); i++)
             {
                 pthread_rwlock_wrlock(&(*filetree)[i]._luck_);

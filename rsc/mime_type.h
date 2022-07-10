@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "http.h"
 /*
 #ifdef __cplusplus
 extern "C"

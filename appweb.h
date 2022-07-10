@@ -30,7 +30,9 @@ public:
 };
 appweb::appweb(int UTCoffset, unsigned int port)
 {
+#ifdef _WIN32
     WS_Init();
+#endif
     ev.port = port;
     ev.UTCoffset = UTCoffset;
     app_event_init(&ev);
@@ -38,7 +40,9 @@ appweb::appweb(int UTCoffset, unsigned int port)
 appweb::~appweb()
 {
     app_event_free(&ev);
+#ifdef _WIN32
     WS_clean();
+#endif
 }
 int appweb::on(urlc_t *urlc, size_t len)
 {

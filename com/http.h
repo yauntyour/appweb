@@ -55,35 +55,53 @@ extern "C"
 {
 #endif //__cplusplus
 
-    /*
-            src 源字符串的首地址(buf的地址)
-            separator 指定的分割字符
-            dest 接收子字符串的数组
-    */
-    size_t split(char *src, const char *spt, char **dest)
+    int arr_addend(char ***arr, size_t arr_len, char *poffset, size_t strlen)
     {
-
-        char *pNext = NULL, *pTemp = NULL;
-        size_t count = 0;
-        if (src == NULL || strlen(src) == 0)
+        char **temp = (char **)calloc(arr_len + 1, sizeof(char *));
+        if (arr_len != 0)
         {
-            //如果传入的地址为空或长度为0，直接终止
-            return -1;
+            for (size_t i = 0; i < arr_len; i++)
+            {
+                temp[i] = (*arr)[i];
+            }
         }
-        if (spt == NULL || strlen(spt) == 0)
+        temp[arr_len] = (char *)calloc(strlen + 1, sizeof(char));
+        for (size_t i = 0; i < strlen; i++)
         {
-            //如未指定分割的字符串，直接终止
-            return -1;
+            temp[arr_len][i] += poffset[i];
         }
-        pNext = strtok_r(src, spt, &pTemp);
-        while (pTemp != NULL)
+        temp[arr_len][strlen + 1] = '\0';
+        (*arr) = temp;
+        return 0;
+    }
+    size_t split(char *_Src, size_t _Src_len, const char *spt, char **strv[])
+    {
+        size_t l = strlen(spt), c = 0, t = 0;
+        for (size_t i = 0; i < _Src_len;)
         {
-            dest[count] = pNext;
-            pNext = NULL;
-            count += 1;
-            pNext = strtok_r(NULL, spt, &pTemp);
+            size_t j = 0;
+        start:
+            if (_Src[i + j] == spt[j])
+            {
+                if (j == l - 1)
+                {
+                    arr_addend(strv, c, _Src + t, i - t);
+                    c += 1;
+                    t = (i + l);
+                }
+                else
+                {
+                    j += 1;
+                    goto start;
+                }
+            }
+            else if (j != 0)
+            {
+                i += j;
+            }
+            i += 1;
         }
-        return count;
+        return c;
     }
 
     size_t find_str(char str[], char substr[])

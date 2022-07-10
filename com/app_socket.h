@@ -26,6 +26,10 @@ typedef SOCKET socket_t;
 #include <unistd.h> // close,shutdown, write, read
 #include <string.h>
 
+typedef int socket_t;
+#define INVALID_SOCKET (~0)
+#define SOCKET_ERROR -1
+
 #endif
 
 int close_socket(socket_t sock)
