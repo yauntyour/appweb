@@ -39,6 +39,16 @@ typedef int (*func_cb)(req_t *);
 extern "C"
 {
 #endif //__cplusplus
+       /*
+        necessary arg:
+            char* Name -A node's Name;
+            func_cb func -A deal by function;
+            int req_Type -request model;
+            struct varde *list -A node list this node;
+            size_t list_length, list_size -The list's length & size;
+            int ComPath -Common path resolution:true or false;
+        if req_model == -1,it will disable this Varde;
+       */
     typedef struct varde
     {
         func_cb func;
@@ -100,7 +110,6 @@ extern "C"
         };
 #endif //__cplusplus
     } Varde;
-
 
     int Varde_list_append(Varde *dict, Varde *Var)
     {

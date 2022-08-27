@@ -21,88 +21,137 @@
 #include <time.h>
 #include "appweb.h"
 
-FUNC_CB_C(func)
+FUNC_CB_C(api)
+{
+    char *html = "HTTP/1.1 200 OK \r\n\r\n{'test':'Hello,World'}\r\n \0\0\0";
+    send((*request).addr.socket, html, strlen(html), 0);
+    close_socket((*request).addr.socket);
+};
+FUNC_CB_C(login)
+{
+    FILE *p = fopen("K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
+    size_t l = FIO_TELL(p);
+    char *html = (char *)calloc(l, sizeof(char));
+    fread(html, sizeof(char), l, p);
+    send((*request).addr.socket, html, strlen(html), 0);
+    free(html);
+    close_socket((*request).addr.socket);
+};
+FUNC_CB_C(test)
 {
     char *html = "HTTP/1.1 200 OK \r\n\r\n<h1>Hello,World</h1>\r\n \0\0\0";
     send((*request).addr.socket, html, strlen(html), 0);
     close_socket((*request).addr.socket);
 };
+
 int main(int argc, char const *argv[])
 {
-    /*
-    //等价的C代码
+
     WS_Init();
+    /*
     appev_t ev;
     ev.port = 10000;
     ev.UTCoffset = 8;
-    app_event_init(&ev);
+    ev.root_dict.func = test;
+    app_event_init(&ev, 128);
     */
-    appweb app(8, 10000);
-    
-    urlc_t urlc[] = {
-        {"/home", func, Type_GET},
-    };
-   	
+    appweb app(8, 10000, 128);
+
     /*
-    app_on(&ev, urlc, 1);
-
-    pthread_t acc, rsc;
-    app_acc(&acc, &ev);
-    app_rsc(&rsc, &ev);
-    pthread_join(acc, NULL);
-    pthread_join(rsc, NULL);
-
-    app_event_free(&ev);
-    WS_clean();
+    Varde home_dict = Varde_def(test, Type_GET, "home", ComPath_True);
+    Varde home_list[] = {
+        Varde_def(login, Type_GET, "login", ComPath_True),
+        Varde_def(api, Type_POST, "api", ComPath_True),
+    };
+    Varde_list_append(&(ev.root_dict), &home_dict);
+    Varde_ZIP(&(ev.root_dict));
+    Varde_ZIP(&home_dict);
     */
-	app.on(urlc,1);
+    app.set_root_dict_func(test, Type_ALL);
+
+    Varde home_list[] = {
+        Varde_def(login, Type_GET, "login", ComPath_True),
+        Varde_def(api, Type_POST, "api", ComPath_True),
+    };
+    Varde home_dict = {test, Type_GET, "home", home_list, 2, 2, ComPath_True};
+    home_dict.ZIP();
+
+    app.root_dict_p->append(&home_dict);
+    app.root_dict_p->ZIP();
+
+    /*
+     pthread_t acc_th;
+     app_acc(&acc_th, &ev);
+     pthread_t rsc_th;
+     app_rsc(&rsc_th, &ev);
+     pthread_join(rsc_th, NULL);
+     pthread_join(acc_th, NULL);
+ */
     app.start(flag_wait);
-    delete &app;
     
+    WS_clean();
     return 0;
 }
 ```
 
 ### 基本使用：
+ Varde 的基本原理和结构————树级目录
+[![IMG-20220827-123138.jpg](https://i.postimg.cc/X7HwZKgn/IMG-20220827-123138.jpg)](https://postimg.cc/ykRJtZ5G)
 
-1. 注册一个urlc_t的注册函数。结构为
+1. 注册一个Varde，其结构为
 
    ```C
-   /*
-   necessary arg:
-    char* url -URL path with on();
-    func_cb _func_ -deal by function;
-    int req_model,
-        rsp_code;
-   if req_model == -1,
-   */
-   typedef struct urlc
-   {
-       char *url;//受注册的URL
-       func_cb _func_;//处理函数
-       int req_model;//注册函数的响应类型
-   } urlc_t;
+    /*
+        necessary arg:
+            char* Name -A node's Name;
+            func_cb func -A deal by function;
+            int req_Type -request model;
+            struct varde *list -A node list this node;
+            size_t list_length, list_size -The list's length & size;
+            int ComPath -Common path resolution:true or false;
+        if req_model == -1,it will disable this Varde;
+    */
+    typedef struct varde
+    {
+        func_cb func;
+        int req_Type;
+        char *Name; // The Name of varde
+        struct varde *list;
+        size_t list_length, list_size;
+        int ComPath; // Common path resolution:true or false
+    #ifdef __cplusplus
+        int append(struct varde *Var);
+        int ZIP()
+    #endif //__cplusplus
+    } Varde;
+
    //函数类型为：
-   typedef int (*func_cb)(req_t *);
+   //利用该宏可以快速定义一个标准函数（参见example dome）
+    #define FUNC_CB_C(__name__) int __name__(req_t *request)
    //理论上根据规范，您需要返回一个HTTP状态码检查函数执行，因为在调度器中不会检查函数的执行是否正常，这就要您在编写函数时调试完成。
    ```
-
+    我们提供一个快捷注册的宏
+    ```c++
+    #define Varde_def(func, req_Type, Name, ComPath)  \
+        {                                             \
+            func, req_Type, Name, NULL, 0, 0, ComPath \
+        }
+    //eg: Varde var = Varde_def(test,req_ALL,"test",ComPath_True);
+    ```
 2. 使用`app.start(flag_wait);`执行服务。执行端会监听您提供的port。flag设置为0表示默认阻塞运行。
 
 ### 相关基础信息：
 
 ```c++
-typedef struct appev_t
+typedef struct appev
 {
-    IPv4_addr_t tcpip, udpip;//保存了服务器的两个socket和服务器地址
-    unsigned int port;//端口号
-    req_t acc_list[MAX_CONN];//默认的最大连接数，需要初始化。可以修改MAX_CONN改变默认最大连接数
-    size_t line_length;//注册函数列表的长度
-    urlc_t *line;//注册函数列表
-    int UTCoffset;//执行端所在地区的UTC偏移量，默认为0。
+    IPv4_addr_t tcpip, udpip;
+    unsigned int port;
+    Varde root_dict;
+    req_t *Thread_queue;
+    size_t Thread_queue_length;
+    int UTCoffset;
 } appev_t;
-//利用该宏可以快速定义一个标准函数（参见example dome）
-#define FUNC_CB_C(__name__) int __name__(req_t *request)
 ```
 
 ### SDK&Debug&Python实现的调试工具
@@ -144,7 +193,9 @@ typedef struct appev_t
 # 后续更新信息
 
 1. 加入zlib支持gzip压缩
-2. 加入升级版res，资源池
+2. 改进RESRC资源池设计
+3. 支持HTTP2-3
+4. UDP接口开放
 
 ### Made by yauntyour Copyright reserved.
 
