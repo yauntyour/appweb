@@ -18,7 +18,7 @@ typedef struct Asfio // asynchronous I/O
 // pthread_t redefine
 typedef unsigned long long CALLBLACK_TH;
 
-extern Asfio Asfio_create(const char *filepath,const char *mode)
+extern Asfio Asfio_create(const char *filepath, const char *mode)
 {
     Asfio asfio;
     // create a luck
@@ -43,7 +43,7 @@ void *__read__(void *args)
     pthread_rwlock_rdlock(&asp->AsfioLuck);
     size_t i = FIO_TELL(asp->Stream);
     bytes filedata;
-    bytes_create(&filedata,i);
+    bytes_create(&filedata, i);
     fseek(asp->Stream, 0L, SEEK_SET);
     if (fread(filedata.data, 1ULL, i, asp->Stream) == i)
     {
@@ -81,27 +81,26 @@ extern CALLBLACK_TH Asfio_readall(Asfio *asp)
     }
 }
 // callblack function
-extern bytes *Asfio_callblack(CALLBLACK_TH th)
+extern size_t Asfio_callblack(CALLBLACK_TH th, bytes *res)
 {
     if (th != -1 & th != 0)
     {
-        bytes *res;
         if (pthread_join(th, (void **)&res->data) == 0)
         {
             if (res->data != NULL)
             {
-                return res;
+                return res->length;
             }
             else
             {
                 fprintf(stderr, "%s\n", "Asfio Callblack function::return NULL");
-                return NULL;
+                return 0;
             }
         }
         else
         {
             fprintf(stderr, "%s\n", " Asfio Callblack function::join() error.");
-            return NULL;
+            return 0;
         }
     }
     else
@@ -136,7 +135,7 @@ void *__write__(void *args)
     }
 };
 
-extern int Asfio_write(Asfio *asp, const void *Element,size_t size)
+extern int Asfio_write(Asfio *asp, const void *Element, size_t size)
 {
     if (asp != NULL)
     {
@@ -187,52 +186,27 @@ extern int Asfio_close(Asfio *asp, int mode)
     }
 }
 
-//Asfio readcall() function
-typedef struct RTM_arg {
-    Asfio *asp;
-    bytes *buf;
-} RTM_arg;
-
-void *__readtomem__(void *args)
-{
-    RTM_arg *arg = (RTM_arg *)args;
-    pthread_rwlock_rdlock(&arg->asp->AsfioLuck);
-    size_t i = FIO_TELL(arg->asp->Stream);
-    bytes filedata;
-    bytes_create(&filedata,i);
-    fseek(arg->asp->Stream, 0L, SEEK_SET);
-    if (fread(filedata.data, 1ULL, i,arg->asp->Stream) == i)
-    {
-        rewind(arg->asp->Stream);
-        pthread_rwlock_unlock(&arg->asp->AsfioLuck);
-        *(arg->buf) = filedata;
-    }
-    else
-    {
-        rewind(arg->asp->Stream);
-        pthread_rwlock_unlock(&arg->asp->AsfioLuck);
-        fprintf(stderr, "%s\n", "Asfio read has error");
-    }
-    return (void *)NULL;
-}
-extern int Asfio_readcall(Asfio *asp,bytes *buf)
+// Asfio readcall() function
+extern size_t Asfio_readcall(Asfio *asp, bytes *buf)
 {
     if (asp != NULL)
     {
-        pthread_t th;
-        RTM_arg arg;
-        arg.asp = asp;
-        arg.buf = buf;
-        if (pthread_create(&th, NULL, __readtomem__, (void *)&arg) == 0)
+        pthread_rwlock_rdlock(&asp->AsfioLuck);
+        size_t i = FIO_TELL(asp->Stream);
+        bytes_create(buf, i);
+        fseek(asp->Stream, 0L, SEEK_SET);
+        if (fread(buf->data, 1ULL, i, asp->Stream) == i)
         {
-            pthread_join(th,NULL);
-            return 0;
+            rewind(asp->Stream);
+            pthread_rwlock_unlock(&asp->AsfioLuck);
         }
         else
         {
-            fprintf(stderr, "%s\n", "Asfio thread create fail");
-            return -1;
+            rewind(asp->Stream);
+            pthread_rwlock_unlock(&asp->AsfioLuck);
+            fprintf(stderr, "%s\n", "Asfio read has error");
         }
+        return buf->length;
     }
     else
     {

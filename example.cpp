@@ -2,49 +2,75 @@
 #include <stdio.h>
 #include <time.h>
 #include "appweb.h"
-//#include <pthread.h>
 
-FUNC_CB_C(func)
+FUNC_CB_C(api)
+{
+    char *html = "HTTP/1.1 200 OK \r\n\r\n{'test':'Hello,World'}\r\n \0\0\0";
+    send((*request).addr.socket, html, strlen(html), 0);
+    close_socket((*request).addr.socket);
+};
+FUNC_CB_C(login)
+{
+    FILE *p = fopen("K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
+    size_t l = FIO_TELL(p);
+    char *html = (char *)calloc(l, sizeof(char));
+    fread(html, sizeof(char), l, p);
+    send((*request).addr.socket, html, strlen(html), 0);
+    free(html);
+    close_socket((*request).addr.socket);
+};
+FUNC_CB_C(test)
 {
     char *html = "HTTP/1.1 200 OK \r\n\r\n<h1>Hello,World</h1>\r\n \0\0\0";
     send((*request).addr.socket, html, strlen(html), 0);
     close_socket((*request).addr.socket);
 };
+
 int main(int argc, char const *argv[])
 {
-    /*
+
     WS_Init();
-    acc_event ev;
+    /*
+    appev_t ev;
     ev.port = 10000;
     ev.UTCoffset = 8;
-    app_event_init(&ev);
+    ev.root_dict.func = test;
+    app_event_init(&ev, 128);
     */
-    
-    appweb app(8, 9999);
-    urlc_t urlc[] = {
-        {"/home", func, Type_GET},
+    appweb app(8, 10000, 128);
+
+    /*
+    Varde home_dict = Varde_def(test, Type_GET, "home", ComPath_True);
+    Varde home_list[] = {
+        Varde_def(login, Type_GET, "login", ComPath_True),
+        Varde_def(api, Type_POST, "api", ComPath_True),
     };
-    app.on(urlc,1);
+    Varde_list_append(&(ev.root_dict), &home_dict);
+    Varde_ZIP(&(ev.root_dict));
+    Varde_ZIP(&home_dict);
+    */
+    app.set_root_dict_func(test, Type_ALL);
+
+    Varde home_list[] = {
+        Varde_def(login, Type_GET, "login", ComPath_True),
+        Varde_def(api, Type_POST, "api", ComPath_True),
+    };
+    Varde home_dict = {test, Type_GET, "home", home_list, 2, 2, ComPath_True};
+    home_dict.ZIP();
+
+    app.root_dict_p->append(&home_dict);
+    app.root_dict_p->ZIP();
+
+    /*
+     pthread_t acc_th;
+     app_acc(&acc_th, &ev);
+     pthread_t rsc_th;
+     app_rsc(&rsc_th, &ev);
+     pthread_join(rsc_th, NULL);
+     pthread_join(acc_th, NULL);
+ */
     app.start(flag_wait);
-    delete &app;
-    /*
-    app_on(&ev, urlc, 1);
-
-    pthread_t acc, rsc;
-    app_acc(&acc, &ev);
-    app_rsc(&rsc, &ev);
-    pthread_join(acc, NULL);
-    pthread_join(rsc, NULL);
-
-    app_event_free(&ev);
+    
     WS_clean();
-    */
-    /*
-    bytes buf;
-    char *text1 = "POST /index.php HTTP/1.1\r\nHost: localhost\r\nUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2\r\n\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8\r\nAccept-Language: zh-cn,zh;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nConnection: keep-alive\r\nReferer: http://localhost/\r\nContent-Length: 25\r\nContent-Type: application/x-www-form-urlencoded\r\nusername=aa&password=1234";
-    char *text2 = "POST /index.php HTTP/1.1";
-    bytes_create(&buf,25);
-    memcpy(buf.data,text2,25);
-    */
     return 0;
 }

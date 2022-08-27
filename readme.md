@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
     /*
     //等价的C代码
     WS_Init();
-    acc_event ev;
+    appev_t ev;
     ev.port = 10000;
     ev.UTCoffset = 8;
     app_event_init(&ev);
@@ -92,7 +92,7 @@ int main(int argc, char const *argv[])
 ### 相关基础信息：
 
 ```c++
-typedef struct acc_event
+typedef struct appev_t
 {
     IPv4_addr_t tcpip, udpip;//保存了服务器的两个socket和服务器地址
     unsigned int port;//端口号
@@ -100,7 +100,7 @@ typedef struct acc_event
     size_t line_length;//注册函数列表的长度
     urlc_t *line;//注册函数列表
     int UTCoffset;//执行端所在地区的UTC偏移量，默认为0。
-} acc_event;
+} appev_t;
 //利用该宏可以快速定义一个标准函数（参见example dome）
 #define FUNC_CB_C(__name__) int __name__(req_t *request)
 ```

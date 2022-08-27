@@ -14,7 +14,7 @@ extern "C"
 {
 #endif //_cplusplu
 
-    int app_event_init(acc_event *event)
+    int app_event_init(appev_t *event, size_t MAXCONN)
     {
         (*event).tcpip.socket = socket(AF_INET, SOCK_STREAM, 0);
         (*event).udpip.socket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -31,8 +31,8 @@ extern "C"
         (*event).tcpip.address.sin_addr.S_un.S_addr = INADDR_ANY;
         (*event).udpip.address.sin_addr.S_un.S_addr = INADDR_ANY;
 #else
-        (*event).tcpip.address.sin_addr.s_addr = INADDR_ANY;
-        (*event).udpip.address.sin_addr.s_addr = INADDR_ANY;
+    (*event).tcpip.address.sin_addr.s_addr = INADDR_ANY;
+    (*event).udpip.address.sin_addr.s_addr = INADDR_ANY;
 #endif
         if (bind((*event).tcpip.socket, (const sockaddr *)&(*event).tcpip.address, sizeof((*event).tcpip.address)) == SOCKET_ERROR)
         {
@@ -45,25 +45,35 @@ extern "C"
             return -1;
         }
 
-        if (listen((*event).tcpip.socket, MAX_CONN) == SOCKET_ERROR)
+        if (listen((*event).tcpip.socket, MAXCONN) == SOCKET_ERROR)
         {
             printf("%s: listen TCP %s:%d failed. %s\n", __func__, "localhost", (*event).port, strerror(errno));
             return -1;
         }
-        for (size_t i = 0; i < MAX_CONN; i++)
+
+        (*event).Thread_queue = (req_t *)calloc(MAXCONN, sizeof(req_t));
+        memset((*event).Thread_queue, 0, MAXCONN);
+        for (size_t i = 0; i < MAXCONN; i++)
         {
-            (*event).acc_list[i]._stat_ = stat_acc;
+            (*event).Thread_queue[i]._stat_ = stat_acc;
         }
 
-        (*event).line = NULL;
-        (*event).line_length = 0;
+        (*event).Thread_queue_length = MAXCONN;
 
-        signal(SIGINT,sighandler);
-        signal(SIGTERM,sighandler);
-        
+        (*event).root_dict.func = NULL;
+        (*event).root_dict.Name = NULL;
+        (*event).root_dict.req_Type = Type_ALL;
+
+        (*event).root_dict.list = NULL;
+        (*event).root_dict.list_length = 0;
+        (*event).root_dict.list_size = 0;
+
+        signal(SIGINT, sighandler);
+        signal(SIGTERM, sighandler);
+
         return 0;
     }
-    int app_event_free(acc_event *event)
+    int app_event_free(appev_t *event)
     {
         close_socket(event->tcpip.socket);
         close_socket(event->udpip.socket);
@@ -71,7 +81,7 @@ extern "C"
     }
     void *_acc(void *arg)
     {
-        acc_event *event = (acc_event *)arg;
+        appev_t *event = (appev_t *)arg;
         LOG("Server start at host:[http://localhost:%d]\n", event->port);
         while (1)
         {
@@ -79,7 +89,7 @@ extern "C"
 #ifdef _WIN32
             int sizeof_req = sizeof(request.addr.address);
 #else
-            socklen_t sizeof_req = sizeof(request.addr.address);
+        socklen_t sizeof_req = sizeof(request.addr.address);
 #endif
         __Accept__:
             request.addr.socket = accept(event->tcpip.socket, (sockaddr *)&request.addr.address, &sizeof_req);
@@ -92,10 +102,10 @@ extern "C"
                     LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
                 }
 #else
-                if (err != EAGAIN)
-                {
-                    LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
-                }
+            if (err != EAGAIN)
+            {
+                LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+            }
 #endif
                 goto __Accept__;
             }
@@ -104,27 +114,27 @@ extern "C"
                 time(&(request.time));
                 char buf[MAX_TIME_LEN];
                 LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &(request.time)), inet_ntoa(request.addr.address.sin_addr), request.addr.address.sin_port);
-            START:
-                for (size_t i = 0; i < MAX_CONN; i++)
+            __Restart__:
+                for (size_t i = 0; i < event->Thread_queue_length; i++)
                 {
-                    if ((*event).acc_list[i]._stat_ == stat_acc)
+                    if (event->Thread_queue[i]._stat_ == stat_acc)
                     {
-                        (*event).acc_list[i] = request;
-                        (*event).acc_list[i]._stat_ = stat_rsc;
+                        request._stat_ = stat_rsc;
+                        event->Thread_queue[i] = request;
                         break;
                     }
-                    else if (i == MAX_CONN - 1)
+                    if (i == event->Thread_queue_length - 1)
                     {
-                        LOG("CONNECT MAX: %d", MAX_CONN);
+                        LOG("CONNECT MAX: %d",event->Thread_queue_length);
                         send(request.addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
-                        goto START;
+                        goto __Restart__;
                     }
                 }
             }
         }
         pthread_exit(NULL);
     }
-    int app_acc(pthread_t *th, acc_event *event)
+    int app_acc(pthread_t *th, appev_t *event)
     {
         return pthread_create(th, NULL, _acc, event);
     }

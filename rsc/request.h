@@ -11,11 +11,16 @@ extern "C"
     {
         if (request->data.data != NULL)
         {
-            if(split((*request).data.data,(*request).data.length, "\r\n", &(*request).reqline) == 0) return -1;
+            (*request).reqline_len = split((*request).data.data, (*request).data.length, "\r\n", &(*request).reqline);
+            if ((*request).reqline_len == 0)
+                return -1;
             char **dest;
-            if(split((*request).reqline[0],strlen((*request).reqline[0]), " ", &dest) == 0) return -1;
+            if (split((*request).reqline[0], strlen((*request).reqline[0]), " ", &dest) == 0)
+                return -1;
             (*request).req_model = dest[0];
-            (*request).url = dest[1];
+            (*request).url_slice_len = split(dest[1], strlen(dest[1]), "/", &(*request).url_slice) + 1;
+            if ((*request).url_slice_len == 0)
+                return -1;
             return 0;
         }
         return -1;

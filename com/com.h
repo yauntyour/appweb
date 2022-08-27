@@ -1,17 +1,19 @@
 #pragma once
 #ifndef __COM__H__
 #define __COM__H__
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <pthread.h>
+
 #include "app_socket.h"
 #include "bytes.h"
 #include "http.h"
 #include "address.h"
 #include "log.h"
 
-#define __SERVER__ "Appweb/1.0"
+#define __SERVER__ "Appweb/2.0"
 
-#define HOME_DIR "./home/"
-
-#define MAX_CONN 128
 #define MAX_RECV_BUF 2048
 
 #define MAX_TIME_LEN 32
@@ -27,48 +29,20 @@
 
 void sighandler(int signum)
 {
-   printf("signal code:%d,over\n", signum);
-   exit(signum);
+    printf("signal code:%d,over\n", signum);
+    exit(signum);
 }
 
-typedef struct request_event
-{
-    time_t time;
-    IPv4_addr_t addr;
-    bytes data;
-    char **reqline;
-    char *req_model;
-    char *url;
-    int _stat_;
-} req_t;
-
-typedef int (*func_cb)(req_t *);
-
-/*
-necessary arg:
- char* url -URL path with on();
- func_cb _func_ -deal by function;
- int req_model,
-     rsp_code;
-if req_model == -1,
-*/
-typedef struct urlc
-{
-    char *url;
-    func_cb _func_;
-    int req_model;
-} urlc_t;
-
-
-typedef struct acc_event
+#include "Varde.h"
+typedef struct appev
 {
     IPv4_addr_t tcpip, udpip;
     unsigned int port;
-    req_t acc_list[MAX_CONN];
-    size_t line_length;
-    urlc_t *line;
+    Varde root_dict;
+    req_t *Thread_queue;
+    size_t Thread_queue_length;
     int UTCoffset;
-} acc_event;
+} appev_t;
 #define FUNC_CB_C(__name__) int __name__(req_t *request)
 
 #endif //!__COM__H__
