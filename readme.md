@@ -6,7 +6,7 @@
 
 - acc（接受请求）
 - rsc（响应+调度器实现）
-- [RESRC（资源池）]: https://github.com/yauntyour/RESRC
+- RESRC（资源池）https://github.com/yauntyour/RESRC
 - com（中心封装和集成）
 
 全部二次封装&集成&C++ class封装于`appweb.h`。
