@@ -105,8 +105,19 @@ extern "C"
                 }
             }
         }
-        realloc(a->request, sizeof(req_t));
-        a->request->_stat_ = stat_acc;
+
+        free((*a->request).data.data);
+        free((*a->request).reqline);
+        free((*a->request).url_slice);
+        (*a->request).data.data = NULL;
+        (*a->request).reqline = NULL;
+        (*a->request).url_slice = NULL;
+
+        (*a->request).data.length = 0;
+        (*a->request).reqline_len = 0;
+        (*a->request).url_slice_len = 0;
+        (*a->request)._stat_ = stat_acc;
+
         pthread_exit(NULL);
         return NULL;
     }
