@@ -21,6 +21,8 @@
 #include <time.h>
 #include "appweb.h"
 
+static RESRC res;
+
 FUNC_CB_C(api)
 {
     char *html = "HTTP/1.1 200 OK \r\n\r\n{'test':'Hello,World'}\r\n \0\0\0";
@@ -29,23 +31,24 @@ FUNC_CB_C(api)
 };
 FUNC_CB_C(login)
 {
-    FILE *p = fopen("K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
-    size_t l = FIO_TELL(p);
-    char *html = (char *)calloc(l, sizeof(char));
-    fread(html, sizeof(char), l, p);
-    send((*request).addr.socket, html, strlen(html), 0);
-    free(html);
+    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\data.html");
+    send((*request).addr.socket, p->data.data, p->data.length, 0);
     close_socket((*request).addr.socket);
 };
 FUNC_CB_C(test)
 {
-    char *html = "HTTP/1.1 200 OK \r\n\r\n<h1>Hello,World</h1>\r\n \0\0\0";
+    char *html = "HTTP/1.1 200 OK \r\n\r\n<h1 style='text-align:center;'>Hello,World</h1>\r\n \0\0\0";
     send((*request).addr.socket, html, strlen(html), 0);
     close_socket((*request).addr.socket);
 };
 
 int main(int argc, char const *argv[])
 {
+
+    RESRC_create(&res, 1);
+
+    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[0]), "K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
+    RESRC_FILE_cache(10, &(res.filelist[0]));
 
     WS_Init();
     /*
@@ -55,7 +58,7 @@ int main(int argc, char const *argv[])
     ev.root_dict.func = test;
     app_event_init(&ev, 128);
     */
-    appweb app(8, 10000, 128);
+    appweb app(8, 10000, 2);
 
     /*
     Varde home_dict = Varde_def(test, Type_GET, "home", ComPath_True);
@@ -70,7 +73,7 @@ int main(int argc, char const *argv[])
     app.set_root_dict_func(test, Type_ALL);
 
     Varde home_list[] = {
-        Varde_def(login, Type_GET, "login", ComPath_True),
+        Varde_def(login, Type_GET, "postTest", ComPath_True),
         Varde_def(api, Type_POST, "api", ComPath_True),
     };
     Varde home_dict = {test, Type_GET, "home", home_list, 2, 2, ComPath_True};
@@ -88,8 +91,9 @@ int main(int argc, char const *argv[])
      pthread_join(acc_th, NULL);
  */
     app.start(flag_wait);
-    
+
     WS_clean();
+    RESRC_FILE_CLOSE(&(res.filelist[0]));
     return 0;
 }
 ```

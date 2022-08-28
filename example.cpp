@@ -71,7 +71,7 @@ int main(int argc, char const *argv[])
      app_rsc(&rsc_th, &ev);
      pthread_join(rsc_th, NULL);
      pthread_join(acc_th, NULL);
- */
+    */
     app.start(flag_wait);
 
     WS_clean();
