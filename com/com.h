@@ -14,7 +14,7 @@
 
 #define __SERVER__ "Appweb/2.0"
 
-#define MAX_RECV_BUF 2048
+#define MAX_RECV_BUF 1024
 
 #define MAX_TIME_LEN 32
 
@@ -39,8 +39,7 @@ typedef struct appev
     IPv4_addr_t tcpip, udpip;
     unsigned int port;
     Varde root_dict;
-    req_t *Thread_queue;
-    size_t Thread_queue_length;
+    size_t MAXCONNECT;
     int UTCoffset;
 } appev_t;
 #define FUNC_CB_C(__name__) int __name__(req_t *request)

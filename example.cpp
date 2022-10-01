@@ -40,7 +40,8 @@ int main(int argc, char const *argv[])
     ev.root_dict.func = test;
     app_event_init(&ev, 128);
     */
-    appweb app(8, 10000, 2);
+
+    appweb app(8, 10000, 3);
 
     /*
     Varde home_dict = Varde_def(test, Type_GET, "home", ComPath_True);
@@ -52,6 +53,7 @@ int main(int argc, char const *argv[])
     Varde_ZIP(&(ev.root_dict));
     Varde_ZIP(&home_dict);
     */
+
     app.set_root_dict_func(test, Type_ALL);
 
     Varde home_list[] = {
@@ -72,6 +74,7 @@ int main(int argc, char const *argv[])
      pthread_join(rsc_th, NULL);
      pthread_join(acc_th, NULL);
     */
+
     app.start(flag_wait);
 
     WS_clean();

@@ -22,7 +22,6 @@ typedef struct request_event
     size_t url_slice_len;
 
     char *req_model;
-    int _stat_;
 } req_t;
 /*@yauntyour*/
 

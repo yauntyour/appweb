@@ -68,12 +68,6 @@ int appweb::start(int flag)
         printf("Error message: acc thread create fail. Error code:%d\n", _r_);
         return _r_;
     }
-    _r_ = app_rsc(&rsc, &ev);
-    if (_r_ != 0)
-    {
-        printf("Error message: rsc thread create fail. Error code:%d\n", _r_);
-        return _r_;
-    }
     if (flag == 0)
     {
         pthread_join(acc, NULL);

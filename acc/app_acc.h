@@ -1,7 +1,9 @@
 #pragma once
 #ifndef __APP_ACC__H__
 #define __APP_ACC__H__
+
 #include "../com/com.h"
+#include "../rsc/app_rsc.h"
 
 #include <time.h>
 #include <stdlib.h>
@@ -51,14 +53,7 @@ extern "C"
             return -1;
         }
 
-        (*event).Thread_queue = (req_t *)calloc(MAXCONN, sizeof(req_t));
-        memset((*event).Thread_queue, 0, MAXCONN);
-        for (size_t i = 0; i < MAXCONN; i++)
-        {
-            (*event).Thread_queue[i]._stat_ = stat_acc;
-        }
-
-        (*event).Thread_queue_length = MAXCONN;
+        (*event).MAXCONNECT = MAXCONN;
 
         (*event).root_dict.func = NULL;
         (*event).root_dict.Name = NULL;
@@ -73,6 +68,7 @@ extern "C"
 
         return 0;
     }
+
     int app_event_free(appev_t *event)
     {
         close_socket(event->tcpip.socket);
@@ -83,6 +79,7 @@ extern "C"
     {
         appev_t *event = (appev_t *)arg;
         LOG("Server start at host:[http://localhost:%d]\n", event->port);
+        size_t t = 0;
         while (1)
         {
             req_t request;
@@ -115,20 +112,16 @@ extern "C"
                 char buf[MAX_TIME_LEN];
                 LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &(request.time)), inet_ntoa(request.addr.address.sin_addr), request.addr.address.sin_port);
             __Restart__:
-                for (size_t i = 0; i < event->Thread_queue_length; i++)
+                if (t >= event->MAXCONNECT)
                 {
-                    if (event->Thread_queue[i]._stat_ == stat_acc)
-                    {
-                        request._stat_ = stat_rsc;
-                        event->Thread_queue[i] = request;
-                        break;
-                    }
-                    if (i == event->Thread_queue_length - 1)
-                    {
-                        LOG("CONNECT MAX: %d",event->Thread_queue_length);
-                        send(request.addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
-                        goto __Restart__;
-                    }
+                    LOG("CONNECT MAX: %d\n", event->MAXCONNECT);
+                    send(request.addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
+                    goto __Restart__;
+                }
+                else
+                {
+                    app_rsc(&t,request,event);
+                    t += 1;
                 }
             }
         }
