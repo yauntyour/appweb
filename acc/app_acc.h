@@ -82,15 +82,15 @@ extern "C"
         size_t t = 0;
         while (1)
         {
-            req_t request;
+            req_t *request = (req_t *)calloc(1,sizeof(req_t));
 #ifdef _WIN32
-            int sizeof_req = sizeof(request.addr.address);
+            int sizeof_req = sizeof((*request).addr.address);
 #else
         socklen_t sizeof_req = sizeof(request.addr.address);
 #endif
         __Accept__:
-            request.addr.socket = accept(event->tcpip.socket, (sockaddr *)&request.addr.address, &sizeof_req);
-            if (request.addr.socket == INVALID_SOCKET)
+            (*request).addr.socket = accept(event->tcpip.socket, (sockaddr *)&(*request).addr.address, &sizeof_req);
+            if ((*request).addr.socket == INVALID_SOCKET)
             {
                 int err = get_error();
 #ifdef _WIN32
@@ -108,14 +108,14 @@ extern "C"
             }
             else
             {
-                time(&(request.time));
+                time(&((*request).time));
                 char buf[MAX_TIME_LEN];
-                LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &(request.time)), inet_ntoa(request.addr.address.sin_addr), request.addr.address.sin_port);
+                LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*request).time)), inet_ntoa((*request).addr.address.sin_addr), (*request).addr.address.sin_port);
             __Restart__:
                 if (t >= event->MAXCONNECT)
                 {
                     LOG("CONNECT MAX: %d\n", event->MAXCONNECT);
-                    send(request.addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
+                    send((*request).addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
                     goto __Restart__;
                 }
                 else
