@@ -113,6 +113,20 @@ extern "C"
         }
         return buf->offset;
     }
+    size_t bytes_append(bytes *buf, bytes *data)
+    {
+        if (buf == NULL || data == NULL)
+        {
+            return -1;
+        }
+        bytes temp;
+        bytes_create(&temp, buf->length + data->length);
+        bytes_copy(&temp, buf);
+        memcpy(temp.data + buf->length, data->data, data->length);
+        bytes_delete(buf);
+        (*buf) = temp;
+        return 0;
+    }
 #ifdef __cplusplus
 };
 

@@ -8,7 +8,7 @@ pingList = []
 
 def netcat():
     i = 0
-    while i < 10000:
+    while i < 1:
         i += 1
         if len(sys.argv) == 1:
             sys.argv.append(input("Host:"))
