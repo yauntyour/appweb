@@ -9,7 +9,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <signal.h>
 
+void sighandler(int signum)
+{
+    printf("signal code:%d,over\n", signum);
+    exit(signum);
+}
 #ifdef __cplusplus
 ;
 extern "C"
@@ -82,7 +88,7 @@ extern "C"
         size_t t = 0;
         while (1)
         {
-            req_t *request = (req_t *)calloc(1,sizeof(req_t));
+            req_t *request = (req_t *)calloc(1, sizeof(req_t));
 #ifdef _WIN32
             int sizeof_req = sizeof((*request).addr.address);
 #else
@@ -120,7 +126,7 @@ extern "C"
                 }
                 else
                 {
-                    app_rsc(&t,request,event);
+                    app_rsc(&t, request, event);
                     t += 1;
                 }
             }

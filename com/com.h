@@ -25,14 +25,6 @@
 #define IOS_charset_UTF8 0xff
 #define __error__ -1
 
-#include <signal.h>
-
-void sighandler(int signum)
-{
-    printf("signal code:%d,over\n", signum);
-    exit(signum);
-}
-
 #include "Varde.h"
 typedef struct appev
 {

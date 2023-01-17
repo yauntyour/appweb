@@ -118,6 +118,7 @@ extern "C"
         a.request->url_slice = NULL;
         
         free(a.request);
+        a.request = NULL;
         pthread_exit(NULL);
         return NULL;
     }

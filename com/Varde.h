@@ -81,6 +81,8 @@ extern "C"
                     {
                         free(&(list));
                     }
+
+                    free(list);
                     list = temp;
                     list_length += 1;
                     list_size = l;
@@ -103,7 +105,10 @@ extern "C"
             {
                 temp[i] = list[i];
             }
+
+            free(list);
             list = temp;
+
             list_size = list_length;
             return 0;
         };
@@ -132,7 +137,7 @@ extern "C"
                 temp[(*dict).list_size] = *Var;
                 if ((*dict).list != NULL)
                 {
-                    free(&((*dict).list));
+                    free((*dict).list);
                 }
                 (*dict).list = temp;
                 (*dict).list_length += 1;
@@ -156,6 +161,7 @@ extern "C"
         {
             temp[i] = dict->list[i];
         }
+        free((*dict).list);
         (*dict).list = temp;
         (*dict).list_size = (*dict).list_length;
         return 0;
