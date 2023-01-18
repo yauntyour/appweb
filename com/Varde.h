@@ -105,8 +105,6 @@ extern "C"
             {
                 temp[i] = list[i];
             }
-
-            free(list);
             list = temp;
 
             list_size = list_length;
@@ -161,7 +159,6 @@ extern "C"
         {
             temp[i] = dict->list[i];
         }
-        free((*dict).list);
         (*dict).list = temp;
         (*dict).list_size = (*dict).list_length;
         return 0;
