@@ -17,7 +17,7 @@ extern "C"
             for (size_t i = 0; i < arr_len; i++)
             {
                 temp[i] = (*arr)[i];
-                free((*arr)[i]);
+                //free((*arr)[i]);
                 (*arr)[i] = NULL;
             }
         }
@@ -58,7 +58,7 @@ extern "C"
             i += 1;
         }
         arr_addend(strv, c, _Src + t, _Src_len - t);
-        return c + 1;
+        return c;
     }
 
     size_t find_str(char str[], char substr[])
