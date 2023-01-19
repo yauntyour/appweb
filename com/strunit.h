@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "memc.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -17,8 +20,7 @@ extern "C"
             for (size_t i = 0; i < arr_len; i++)
             {
                 temp[i] = (*arr)[i];
-                //free((*arr)[i]);
-                (*arr)[i] = NULL;
+                mem_free((*arr)[i]);
             }
         }
         temp[arr_len] = (char *)calloc(strlen + 1, sizeof(char));
