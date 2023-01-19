@@ -115,6 +115,7 @@ extern "C"
         mem_free(a.request->reqline);
         mem_free(a.request->url_slice);
         mem_free(a.request);
+        mem_free(arg);
         /*
         free(a.request->data.data);
         free(a.request->reqline);
@@ -125,20 +126,20 @@ extern "C"
 
         free(a.request);
         a.request = NULL;
-        */
-        pthread_detach(pthread_self());
+*/
         pthread_exit(NULL);
     }
     int app_rsc(size_t *i, req_t *request, appev_t *event)
     {
         pthread_t t;
-        static __search__arg_t *arg = (__search__arg_t *)malloc(sizeof(__search__arg_t));
+        __search__arg_t *arg = (__search__arg_t *)malloc(sizeof(__search__arg_t));
 
         arg->request = request;
         arg->root_dict = &(event->root_dict);
         arg->i = i;
 
         pthread_create(&t, NULL, __search__, arg);
+        pthread_detach(t);
         return 0;
     }
 #ifdef __cplusplus

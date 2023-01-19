@@ -9,13 +9,15 @@
 #define LOGFILE(filepath, LOG_file_p) LOG_file_p = fopen(filepath, "a+")
 
 #define LOG_INFO(format, ...) \
-    printf("\033[32m" format, __VA_ARGS__)
+    printf("\033[32m" format"\033[0m", __VA_ARGS__)
 #define LOG_ERR(format, ...) \
-    printf("\033[31m" format, __VA_ARGS__)
+    printf("\033[31m" format"\033[0m", __VA_ARGS__)
 #define LOG_WARN(format, ...) \
-    printf("\033[33m" format, __VA_ARGS__)
-#define LOG(code, format, ...) \
-    printf("\033[%dm" format, code, __VA_ARGS__)
+    printf("\033[33m" format"\033[0m", __VA_ARGS__)
+#define LOG_self(code, format, ...) \
+    printf("\033[%dm" format"\033[0m", code, __VA_ARGS__)
+#define LOG_LIGHT(format, ...) \
+    printf("\033[1m" format"\033[0m", __VA_ARGS__)
 
 #define LOGFILEOUT(LOG_file_p, format, ...)   \
     fprintf(LOG_file_p, format, __VA_ARGS__); \
@@ -24,7 +26,7 @@
 char *getTMUTC(char *buf, int len, int UTCoffset, const char *_Format, time_t *time)
 {
     memset(buf, 0, len);
-    tm t;
+    struct tm t;
 #ifdef _WIN32
     gmtime_s(&t, time);
 #else

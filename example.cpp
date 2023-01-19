@@ -40,7 +40,7 @@ int main(int argc, char const *argv[])
     ev.root_dict.func = test;
     app_event_init(&ev, 128);
     */
-    appweb app(8, 10000, 2);
+    appweb app(8, 10000, 3);
 
     /*
     Varde home_dict = Varde_def(test, Type_GET, "home", ComPath_True);

@@ -11,7 +11,7 @@ extern "C"
     {
         if (request->data.data != NULL)
         {
-            (*request).reqline_len = split((*request).data.data, (*request).data.length, "\r\n", &(*request).reqline);
+            (*request).reqline_len = split((*request).data.data,strlen((*request).data.data), "\r\n", &(*request).reqline);
             if ((*request).reqline_len == 0)
                 return -1;
 
@@ -20,7 +20,9 @@ extern "C"
                 return -1;
                 
             (*request).req_model = dest[0];
+
             (*request).url_slice_len = split(dest[1], strlen(dest[1]), "/", &(*request).url_slice) + 1;
+            mem_free(dest[2]);
             if ((*request).url_slice_len == 0)
                 return -1;
             return 0;

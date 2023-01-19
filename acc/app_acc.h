@@ -84,7 +84,7 @@ extern "C"
     void *_acc(void *arg)
     {
         appev_t *event = (appev_t *)arg;
-        LOG_INFO("Server start at host:[http://localhost:%d]\n", event->port);
+        LOG_LIGHT("Server start at host:[http://localhost:%d]\n", event->port);
         size_t t = 0;
         while (1)
         {
@@ -116,7 +116,7 @@ extern "C"
             {
                 time(&((*request).time));
                 char buf[MAX_TIME_LEN];
-                LOG_INFO("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*request).time)), inet_ntoa((*request).addr.address.sin_addr), (*request).addr.address.sin_port);
+                LOG_LIGHT("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*request).time)), inet_ntoa((*request).addr.address.sin_addr), (*request).addr.address.sin_port);
             __Restart__:
                 if (t >= event->MAXCONNECT)
                 {

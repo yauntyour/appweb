@@ -23,7 +23,7 @@ msg = """GET /home/postTest HTTP/1.1\r\nHost: localhost:10000\r\nConnection: kee
 
 def netcat():
     i = 0
-    while i < 10000:
+    while i < 1000:
         i += 1
         if len(sys.argv) == 1:
             sys.argv.append(input("Host:"))
