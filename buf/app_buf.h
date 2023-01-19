@@ -14,11 +14,7 @@
 extern "C"
 {
 #endif //_cplusplu
-    typedef struct __BUF__
-    {
-        bytes header;
-        bytes body;
-    } resp_bufer;
+    
 #ifdef __cplusplus
 };
 #endif //__cplusplus

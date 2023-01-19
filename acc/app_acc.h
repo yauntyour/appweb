@@ -84,7 +84,7 @@ extern "C"
     void *_acc(void *arg)
     {
         appev_t *event = (appev_t *)arg;
-        LOG("Server start at host:[http://localhost:%d]\n", event->port);
+        LOG_INFO("Server start at host:[http://localhost:%d]\n", event->port);
         size_t t = 0;
         while (1)
         {
@@ -102,12 +102,12 @@ extern "C"
 #ifdef _WIN32
                 if (err != 10035)
                 {
-                    LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+                    LOG_ERR("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
                 }
 #else
             if (err != EAGAIN)
             {
-                LOG("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+                LOG_ERR("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
             }
 #endif
                 goto __Accept__;
@@ -116,11 +116,11 @@ extern "C"
             {
                 time(&((*request).time));
                 char buf[MAX_TIME_LEN];
-                LOG("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*request).time)), inet_ntoa((*request).addr.address.sin_addr), (*request).addr.address.sin_port);
+                LOG_INFO("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*request).time)), inet_ntoa((*request).addr.address.sin_addr), (*request).addr.address.sin_port);
             __Restart__:
                 if (t >= event->MAXCONNECT)
                 {
-                    LOG("CONNECT MAX: %d\n", event->MAXCONNECT);
+                    LOG_WARN("CONNECT MAX: %d\n", event->MAXCONNECT);
                     send((*request).addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
                     goto __Restart__;
                 }
