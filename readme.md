@@ -1,5 +1,5 @@
 
-# appweb (v2.1)
+# appweb (v2.2)
 
 具备简单的集成性基础功能。
 <!--more-->
@@ -11,6 +11,10 @@
 - com（中心封装和集成）
 
 全部二次封装&集成&C++ class封装于`appweb.h`。
+
+# 版本更新内容
+
+[updata.md](https://github.com/yauntyour/appweb/blob/master/updata_v2.2.md)
 
 ## 详细内容
 
@@ -129,7 +133,7 @@ int main(int argc, char const *argv[])
         int ZIP()
     #endif //__cplusplus
     } Varde;
-
+   
    //函数类型为：
    //利用该宏可以快速定义一个标准函数（参见example dome）
     #define FUNC_CB_C(__name__) int __name__(req_t *request)
