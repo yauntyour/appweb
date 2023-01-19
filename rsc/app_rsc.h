@@ -2,12 +2,12 @@
 #ifndef __APP_RSC__H__
 #define __APP_RSC__H__
 
-//#include "../acc/app_acc.h"
+// #include "../acc/app_acc.h"
 #include "../com/com.h"
 
 #include "mime_type.h"
 #include "request.h"
-//#include "inc_zlib.h"
+// #include "inc_zlib.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -110,29 +110,35 @@ extern "C"
             }
         }
         *(a.i) -= 1;
+
+        bytes_delete(&(a.request->data));
+        mem_free(a.request->reqline);
+        mem_free(a.request->url_slice);
+        mem_free(a.request);
+        /*
         free(a.request->data.data);
         free(a.request->reqline);
         free(a.request->url_slice);
         a.request->data.data = NULL;
         a.request->reqline = NULL;
         a.request->url_slice = NULL;
-        
+
         free(a.request);
         a.request = NULL;
+        */
+        pthread_detach(pthread_self());
         pthread_exit(NULL);
-        return NULL;
     }
     int app_rsc(size_t *i, req_t *request, appev_t *event)
     {
         pthread_t t;
-        static __search__arg_t arg;
+        static __search__arg_t *arg = (__search__arg_t *)malloc(sizeof(__search__arg_t));
 
-        arg.request = request;
-        arg.root_dict = &(event->root_dict);
-        arg.i = i;
+        arg->request = request;
+        arg->root_dict = &(event->root_dict);
+        arg->i = i;
 
-        pthread_create(&t, NULL, __search__, &arg);
-        pthread_detach(t);
+        pthread_create(&t, NULL, __search__, arg);
         return 0;
     }
 #ifdef __cplusplus

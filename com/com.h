@@ -11,6 +11,7 @@
 #include "http.h"
 #include "address.h"
 #include "log.h"
+#include "memc.h"
 
 #define __SERVER__ "Appweb/2.0"
 

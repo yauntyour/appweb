@@ -4,66 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "memc.h"
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif //__cplusplus
 
-    //  arr-二维字符串数组的指针
-    int arr_addend(char ***arr, size_t arr_len, char *str, size_t strlen)
-    {
-        char **temp = (char **)calloc(arr_len + 1, sizeof(char *));
-        if (arr_len != 0)
-        {
-            for (size_t i = 0; i < arr_len; i++)
-            {
-                temp[i] = (*arr)[i];
-                mem_free((*arr)[i]);
-            }
-        }
-        temp[arr_len] = (char *)calloc(strlen + 1, sizeof(char));
-        for (size_t i = 0; i < strlen; i++)
-        {
-            temp[arr_len][i] += str[i];
-        }
-        temp[arr_len][strlen + 1] = '\0';
-        (*arr) = temp;
-        return 0;
-    }
-    size_t split(char *_Src, size_t _Src_len, const char *spt, char **strv[])
-    {
-        size_t l = strlen(spt), c = 0, t = 0;
-        for (size_t i = 0; i < _Src_len;)
-        {
-            size_t j = 0;
-        start:
-            if (_Src[i + j] == spt[j])
-            {
-                if (j == l - 1)
-                {
-                    arr_addend(strv, c, _Src + t, i - t);
-                    c += 1;
-                    t = (i + l);
-                }
-                else
-                {
-                    j += 1;
-                    goto start;
-                }
-            }
-            else if (j != 0)
-            {
-                i += j;
-            }
-            i += 1;
-        }
-        arr_addend(strv, c, _Src + t, _Src_len - t);
-        return c;
-    }
-
-    size_t find_str(char str[], char substr[])
+    size_t find_str(char str[], const char substr[])
     {
         size_t count = 0, i, j, check;
         size_t len = strlen(str);
@@ -86,6 +32,48 @@ extern "C"
             }
         }
         return count;
+    }
+
+    size_t split(char *_Src, size_t _Src_len, const char *spt, char **strv[])
+    {
+        /*t is the temp offset*/
+        size_t l = strlen(spt), c = 0, t = 0;
+
+        (*strv) = (char **)calloc(find_str(_Src, spt), sizeof(char *));
+        for (size_t i = 0; i < _Src_len;)
+        {
+            size_t j = 0;
+        start:
+            if (_Src[i + j] == spt[j])
+            {
+                if (j == l - 1)
+                {
+                    (*strv)[c] = (char *)calloc(i - t + 1, sizeof(char));
+                    for (size_t x = 0; x < i - t; x++)
+                    {
+                        (*strv)[c][x] = _Src[t + x];
+                    }
+                    c += 1;
+                    t = (i + l);
+                }
+                else
+                {
+                    j += 1;
+                    goto start;
+                }
+            }
+            else if (j != 0)
+            {
+                i += j;
+            }
+            i += 1;
+        }
+        (*strv)[c] = (char*)calloc(_Src_len - t + 1, sizeof(char));
+        for (size_t x = 0; x < _Src_len - t; x++)
+        {
+            (*strv)[c][x] = _Src[t + x];
+        }
+        return c;
     }
 #ifdef __cplusplus
 }
