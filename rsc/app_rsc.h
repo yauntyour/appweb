@@ -30,11 +30,12 @@ extern "C"
     void *__search__(void *arg)
     {
         __search__arg_t a = *((__search__arg_t *)arg);
-
+        int e = 0;
         bytes_create(&(a.request->data), MAX_RECV_BUF);
         recv(a.request->addr.socket, a.request->data.data, MAX_RECV_BUF, 0);
         if (req_create(a.request) == -1)
         {
+            LOG_ERR("Failed to create at %s\r\n", __func__);
             rsp_404(a.request);
         }
         else
@@ -52,7 +53,8 @@ extern "C"
                         }
                         else
                         {
-                            rsp_404(a.request);
+                            e = 1;
+                            goto __rsp__;
                         }
                     }
                     continue;
@@ -68,8 +70,10 @@ extern "C"
                             {
                                 if (strlen(a.request->url_slice[i + 1]) == 0)
                                 {
+                                    e = 2;
                                     goto __rsp__;
                                 }
+                                e = 3;
                                 goto __rsp_404__;
                             }
                             break;
@@ -78,10 +82,12 @@ extern "C"
                         {
                             if (Temp->ComPath == ComPath_True)
                             {
+                                e = 4;
                                 goto __rsp__;
                             }
                             else
                             {
+                                e = 5;
                                 goto __rsp_404__;
                             }
                         }
@@ -102,6 +108,7 @@ extern "C"
                         else
                         {
                         __rsp_404__:
+                            LOG_ERR("Not Found. at %s %d\r\n", __func__, e);
                             rsp_404(a.request);
                             break;
                         }
@@ -138,7 +145,15 @@ extern "C"
         arg->root_dict = &(event->root_dict);
         arg->i = i;
 
-        pthread_create(&t, NULL, __search__, arg);
+        if (pthread_create(&t, NULL, __search__, arg))
+        {
+            LOG_ERR("Thread[PID:%d] created fail at %s()\r\n", t, __func__);
+        }
+        else
+        {
+            LOG_INFO("Thread[PID:%d] created at %s()\r\n", t, __func__);
+        }
+
         pthread_detach(t);
         return 0;
     }

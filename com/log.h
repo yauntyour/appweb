@@ -9,15 +9,15 @@
 #define LOGFILE(filepath, LOG_file_p) LOG_file_p = fopen(filepath, "a+")
 
 #define LOG_INFO(format, ...) \
-    printf("\033[32m" format"\033[0m", __VA_ARGS__)
+    fprintf(stdout, "\033[32m" format "\033[0m", __VA_ARGS__)
 #define LOG_ERR(format, ...) \
-    printf("\033[31m" format"\033[0m", __VA_ARGS__)
+    fprintf(stdout, "\033[31m" format "\033[0m", __VA_ARGS__)
 #define LOG_WARN(format, ...) \
-    printf("\033[33m" format"\033[0m", __VA_ARGS__)
+    fprintf(stdout, "\033[33m" format "\033[0m", __VA_ARGS__)
 #define LOG_self(code, format, ...) \
-    printf("\033[%dm" format"\033[0m", code, __VA_ARGS__)
+    fprintf(stdout, "\033[%dm" format "\033[0m", code, __VA_ARGS__)
 #define LOG_LIGHT(format, ...) \
-    printf("\033[1m" format"\033[0m", __VA_ARGS__)
+    fprintf(stdout, "\033[1m" format "\033[0m", __VA_ARGS__)
 
 #define LOGFILEOUT(LOG_file_p, format, ...)   \
     fprintf(LOG_file_p, format, __VA_ARGS__); \

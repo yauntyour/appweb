@@ -92,7 +92,7 @@ extern "C"
 #ifdef _WIN32
             int sizeof_req = sizeof((*request).addr.address);
 #else
-        socklen_t sizeof_req = sizeof(request.addr.address);
+        socklen_t sizeof_req = sizeof((*request).addr.address);
 #endif
         __Accept__:
             (*request).addr.socket = accept(event->tcpip.socket, (sockaddr *)&(*request).addr.address, &sizeof_req);
