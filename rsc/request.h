@@ -9,30 +9,31 @@ extern "C"
 #endif //__cplusplus
     int req_create(req_t *request)
     {
-        if (request->data.data != NULL)
+        size_t req_len = strlen((*request).data.data);
+        if (request->data.data != NULL && req_len != 0)
         {
-            (*request).reqline_len = split((*request).data.data, strlen((*request).data.data), "\r\n", &(*request).reqline);
-            if ((*request).reqline_len == 0)
+            size_t i = 0;
+            while (1)
             {
-                LOG_ERR("reqline split error %s\r\n", __func__);
-                return -1;
+                if (request->data.data[i] == ' ')
+                {
+                    request->req_model[i] = '\0';
+                    i += 1;
+                    break;
+                }
+                request->req_model[i] = request->data.data[i];
+                i += 1;
             }
-            char **dest;
-            if (split((*request).reqline[0], strlen((*request).reqline[0]), " ", &dest) == 0)
+            size_t j = i;
+            while (1)
             {
-                LOG_ERR("URL line dest split error at %s\r\n", __func__);
-                return -1;
+                if (request->data.data[i] == ' ')
+                {
+                    break;
+                }
+                i += 1;
             }
-
-            (*request).req_model = dest[0];
-
-            (*request).url_slice_len = split(dest[1], strlen(dest[1]), "/", &(*request).url_slice) + 1;
-            mem_free(dest[2]);
-            if ((*request).url_slice_len == 0)
-            {
-                LOG_ERR("URL split error at %s\r\n", __func__);
-                return -1;
-            }
+            request->url_slice_len = split(request->data.data + j, i - j, "/", &(request->url_slice)) + 1;
             return 0;
         }
         return -1;
@@ -43,7 +44,7 @@ extern "C"
         char *buf = (char *)calloc(len, sizeof(char));
         sprintf(buf, "HTTP/1.1 404 Not Found\r\n\r\n%s", RSP_404_HTML);
         send((*request).addr.socket, buf, len, 0);
-        mem_free(buf);
+        free(buf);
         close_socket((*request).addr.socket);
         return 404;
     }

@@ -24,7 +24,6 @@ class appweb
 private:
     appev_t ev;
     pthread_t acc, //响应线程
-        rsc,       //调度线程
         res;       //预留的资源线程
 public:
     Varde *root_dict_p;
@@ -71,7 +70,6 @@ int appweb::start(int flag)
     if (flag == 0)
     {
         pthread_join(acc, NULL);
-        pthread_join(rsc, NULL);
     }
     else
     {

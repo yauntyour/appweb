@@ -15,13 +15,10 @@ typedef struct request_event
     time_t time;
     IPv4_addr_t addr;
     bytes data;
-    char **reqline;
-    size_t reqline_len;
-
     char **url_slice;
     size_t url_slice_len;
 
-    char *req_model;
+    char req_model[8];
 } req_t;
 /*@yauntyour*/
 

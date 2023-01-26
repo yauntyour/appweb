@@ -9,15 +9,14 @@ extern "C"
 {
 #endif //__cplusplus
 
-    size_t find_str(char str[], const char substr[])
+    size_t find_str(char str[],size_t str_len, const char substr[])
     {
         size_t count = 0, i, j, check;
-        size_t len = strlen(str);
         size_t sublen = strlen(substr);
-        for (i = 0; i < len; i++)
+        for (i = 0; i < str_len; i++)
         {
             check = 1;
-            for (j = 0; j + i < len && j < sublen; j++)
+            for (j = 0; j + i < str_len && j < sublen; j++)
             {
                 if (str[i + j] != substr[j])
                 {
@@ -39,7 +38,7 @@ extern "C"
         /*t is the temp offset*/
         size_t l = strlen(spt), c = 0, t = 0;
 
-        (*strv) = (char **)calloc(find_str(_Src, spt), sizeof(char *));
+        (*strv) = (char **)calloc(find_str(_Src,_Src_len, spt), sizeof(char *));
         for (size_t i = 0; i < _Src_len;)
         {
             size_t j = 0;
