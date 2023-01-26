@@ -1,5 +1,5 @@
 
-# appweb (v2.2)
+# appweb (v2.3)——过渡版本
 
 # 重大更新决定：修改底层request处理机制 (v3.0)
 
@@ -92,9 +92,6 @@ int main(int argc, char const *argv[])
     /*
      pthread_t acc_th;
      app_acc(&acc_th, &ev);
-     pthread_t rsc_th;
-     app_rsc(&rsc_th, &ev);
-     pthread_join(rsc_th, NULL);
      pthread_join(acc_th, NULL);
  */
     app.start(flag_wait);
