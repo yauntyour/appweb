@@ -22,21 +22,27 @@ extern "C"
 
     typedef struct __search__arg
     {
-        req_t *request;
-        Varde *root_dict;
+        metadata_type(req_t *) request;
+        appev_t *appev;
+        // Varde *root_dict;
         size_t *i;
     } __search__arg_t;
+
+    metadata_dtorc(buf_dtor)
+    {
+        free(ptr);
+    }
 
     void *__search__(void *arg)
     {
         __search__arg_t *a = ((__search__arg_t *)arg);
         int e = 0;
-        bytes_create(&(a->request->data), MAX_RECV_BUF);
+        bytes_create(&(metadata_ptr(a->request)->data), MAX_RECV_BUF);
         int result = 0;
         while (1)
         {
 
-            result = recv(a->request->addr.socket, a->request->data.data, MAX_RECV_BUF, 0);
+            result = recv(metadata_ptr(a->request)->addr.socket, metadata_ptr(a->request)->data.data, MAX_RECV_BUF, 0);
 #ifdef _WIN32
             if (result < 0)
             {
@@ -48,8 +54,8 @@ extern "C"
             }
             else if (result == 0)
             {
-                bytes_delete(&(a->request->data));
-                free(a->request);
+                close_socket(metadata_ptr(a->request)->addr.socket);
+                metadata_free(a->request);
                 free(arg);
                 pthread_exit(NULL);
             }
@@ -70,23 +76,38 @@ extern "C"
 
 #endif
         }
-        if (req_create(a->request) == -1)
+        if (req_create(metadata_ptr(a->request)) == -1)
         {
             LOG_ERR("Failed to create requestHeader at %s() Result:%d\r\n", __func__, result);
-            rsp_404(a->request);
+            rsp_404(metadata_ptr(a->request));
         }
         else
         {
-            Varde *Temp = a->root_dict;
-            for (size_t i = 0; i < a->request->url_slice_len; i++)
+            Varde *Temp = &(a->appev->root_dict);
+
+            // HTTP/1.1 200 OK\r\nDate: Thu Jan 26 10:57:27 2023\r\n
+            metadata_type(bytes *) buf = (metadata_type(bytes *))metadata_alloc(sizeof(bytes), buf_dtor);
+
+            for (size_t i = 0; i < metadata_ptr(a->request)->url_slice_len; i++)
             {
-                if (strlen(a->request->url_slice[i]) == 0)
+                if (strlen(metadata_ptr(a->request)->url_slice[i]) == 0)
                 {
-                    if (i == a->request->url_slice_len - 1)
+                    if (i == metadata_ptr(a->request)->url_slice_len - 1)
                     {
-                        if (a->root_dict->func != NULL)
+                        if (a->appev->root_dict.func != NULL)
                         {
-                            a->root_dict->func(a->request);
+                            send(metadata_ptr(a->request)->addr.socket, "HTTP/1.1 200 OK\r\n", 17, 0);
+
+                            char time_buf[MAX_TIME_LEN];
+                            getTMUTC(time_buf, MAX_TIME_LEN, a->appev->UTCoffset, "%a %b %d %X %Y", &(metadata_ptr(a->request)->time));
+                            send(metadata_ptr(a->request)->addr.socket, time_buf, strlen(time_buf), 0);
+
+                            char *html = a->appev->root_dict.func(metadata_ptr(a->request), metadata_ptr(buf));
+                            if (metadata_ptr(buf)->data != NULL)
+                            {
+                                send(metadata_ptr(a->request)->addr.socket, metadata_ptr(buf)->data, strlen(metadata_ptr(buf)->data), 0);
+                            }
+                            send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
                         }
                         else
                         {
@@ -99,12 +120,12 @@ extern "C"
                 {
                     for (size_t j = 0; j < Temp->list_length; j++)
                     {
-                        if (strcmp(a->request->url_slice[i], Temp->list[j].Name) == 0)
+                        if (strcmp(metadata_ptr(a->request)->url_slice[i], Temp->list[j].Name) == 0)
                         {
                             Temp = &(Temp->list[j]);
-                            if (Temp->list == NULL && i < a->request->url_slice_len - 1)
+                            if (Temp->list == NULL && i < metadata_ptr(a->request)->url_slice_len - 1)
                             {
-                                if (strlen(a->request->url_slice[i + 1]) == 0)
+                                if (strlen(metadata_ptr(a->request)->url_slice[i + 1]) == 0)
                                 {
                                     goto __rsp__;
                                 }
@@ -127,56 +148,70 @@ extern "C"
                             }
                         }
                     }
-                    if (i == a->request->url_slice_len - 1)
+                    if (i == metadata_ptr(a->request)->url_slice_len - 1)
                     {
                     __rsp__:
                         if (Temp->req_Type == Type_ALL)
                         {
-                            Temp->func(a->request);
+                            send(metadata_ptr(a->request)->addr.socket, "HTTP/1.1 200 OK\r\n", 17, 0);
+
+                            char time_buf[MAX_TIME_LEN];
+                            getTMUTC(time_buf, MAX_TIME_LEN, a->appev->UTCoffset, "%a %b %d %X %Y\r\n", &(metadata_ptr(a->request)->time));
+                            send(metadata_ptr(a->request)->addr.socket, time_buf, strlen(time_buf), 0);
+
+                            char *html = Temp->func(metadata_ptr(a->request), metadata_ptr(buf));
+
+                            if (metadata_ptr(buf)->data != NULL)
+                            {
+                                send(metadata_ptr(a->request)->addr.socket, metadata_ptr(buf)->data, strlen(metadata_ptr(buf)->data), 0);
+                            }
+                            send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+
                             break;
                         }
-                        else if (a->request->req_model != NULL && strcmp(a->request->req_model, Type_req[Temp->req_Type]) == 0)
+                        else if (metadata_ptr(a->request)->req_model != NULL && strcmp(metadata_ptr(a->request)->req_model, Type_req[Temp->req_Type]) == 0)
                         {
-                            Temp->func(a->request);
+                            send(metadata_ptr(a->request)->addr.socket, "HTTP/1.1 200 OK\r\nDate: ", 23, 0);
+
+                            char time_buf[MAX_TIME_LEN];
+                            getTMUTC(time_buf, MAX_TIME_LEN, a->appev->UTCoffset, "%a %b %d %X %Y", &(metadata_ptr(a->request)->time));
+                            send(metadata_ptr(a->request)->addr.socket, time_buf, strlen(time_buf), 0);
+
+                            char *html = Temp->func(metadata_ptr(a->request), metadata_ptr(buf));
+                            if (metadata_ptr(buf)->data != NULL)
+                            {
+                                send(metadata_ptr(a->request)->addr.socket, metadata_ptr(buf)->data, strlen(metadata_ptr(buf)->data), 0);
+                            }
+                            send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+
                             break;
                         }
                         else
                         {
                         __rsp_404__:
                             LOG_ERR("Not Found. at %s() %d\r\n", __func__, e);
-                            rsp_404(a->request);
+                            rsp_404(metadata_ptr(a->request));
                             break;
                         }
                     }
                 }
             }
+            metadata_free(buf);
         }
         *(a->i) -= 1;
 
-        bytes_delete(&(a->request->data));
-        free(a->request->url_slice);
-        free(a->request);
+        close_socket(metadata_ptr(a->request)->addr.socket);
+        metadata_free(a->request);
         free(arg);
-        /*
-        free(a->request->data.data);
-        free(a->request->reqline);
-        free(a->request->url_slice);
-        a->request->data.data = NULL;
-        a->request->reqline = NULL;
-        a->request->url_slice = NULL;
-
-        free(a->request);
-        a->request = NULL;
-*/
         pthread_exit(NULL);
     }
-    int app_rsc(size_t *i, req_t *request, appev_t *event)
+    int app_rsc(size_t *i, metadata_type(req_t *) request, appev_t *event)
     {
         pthread_t t;
         __search__arg_t *arg = (__search__arg_t *)malloc(sizeof(__search__arg_t));
 
         arg->request = request;
-        arg->root_dict = &(event->root_dict);
+        arg->appev = event;
         arg->i = i;
 
         if (pthread_create(&t, NULL, __search__, arg))

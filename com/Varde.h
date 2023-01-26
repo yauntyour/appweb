@@ -10,6 +10,7 @@
 #include "http.h"
 #include "address.h"
 #include "log.h"
+
 typedef struct request_event
 {
     time_t time;
@@ -20,10 +21,23 @@ typedef struct request_event
 
     char req_model[8];
 } req_t;
-/*@yauntyour*/
+
+void request_destroy(void *ptr)
+{
+    req_t *req = (req_t *)ptr;
+    bytes_delete(&(req->data));
+    for (size_t i = 0; i < req->url_slice_len; i++)
+    {
+        free(req->url_slice[i]);
+    }
+    free(req->url_slice);
+    free(req);
+}
 
 /*Varde*/
-typedef int (*func_cb)(req_t *);
+typedef char *(*func_cb)(req_t *, bytes *);
+
+#define FUNC_CB_C(__name__) char *__name__(req_t *req, bytes *header)
 #define ComPath_True 1
 #define ComPath_False 0
 

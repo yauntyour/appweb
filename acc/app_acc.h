@@ -81,6 +81,8 @@ extern "C"
         close_socket(event->udpip.socket);
         return 0;
     }
+
+
     void *_acc(void *arg)
     {
         appev_t *event = (appev_t *)arg;
@@ -88,15 +90,15 @@ extern "C"
         size_t t = 0;
         while (1)
         {
-            req_t *request = (req_t *)calloc(1, sizeof(req_t));
+            metadata_type(req_t *) request = (metadata_type(req_t *))metadata_alloc(sizeof(req_t),request_destroy);
 #ifdef _WIN32
-            int sizeof_req = sizeof((*request).addr.address);
+            int sizeof_req = sizeof((*(metadata_ptr(request))).addr.address);
 #else
         socklen_t sizeof_req = sizeof((*request).addr.address);
 #endif
         __Accept__:
-            (*request).addr.socket = accept(event->tcpip.socket, (sockaddr *)&(*request).addr.address, &sizeof_req);
-            if ((*request).addr.socket == INVALID_SOCKET)
+            (*metadata_ptr(request)).addr.socket = accept(event->tcpip.socket, (sockaddr *)&(*metadata_ptr(request)).addr.address, &sizeof_req);
+            if ((*metadata_ptr(request)).addr.socket == INVALID_SOCKET)
             {
                 int err = get_error();
 #ifdef _WIN32
@@ -114,14 +116,14 @@ extern "C"
             }
             else
             {
-                time(&((*request).time));
+                time(&((*metadata_ptr(request)).time));
                 char buf[MAX_TIME_LEN];
-                LOG_LIGHT("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*request).time)), inet_ntoa((*request).addr.address.sin_addr), (*request).addr.address.sin_port);
+                LOG_LIGHT("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*metadata_ptr(request)).time)), inet_ntoa((*metadata_ptr(request)).addr.address.sin_addr), (*metadata_ptr(request)).addr.address.sin_port);
             __Restart__:
                 if (t >= event->MAXCONNECT)
                 {
                     LOG_WARN("CONNECT MAX: %d\n", event->MAXCONNECT);
-                    send((*request).addr.socket, "HTTP/1.1 503\r\n\0\0\0", 18, MSG_WAITALL);
+                    send((*metadata_ptr(request)).addr.socket, "HTTP/1.1 503\r\n", 15, MSG_WAITALL);
                     goto __Restart__;
                 }
                 else

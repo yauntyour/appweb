@@ -7,21 +7,18 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
-    char *html = "HTTP/1.1 200 OK \r\n\r\n{'test':'Hello,World'}\r\n \0\0\0";
-    send((*request).addr.socket, html, strlen(html), 0);
-    close_socket((*request).addr.socket);
+    char *html = "{'test':'Hello,World'}";
+    return html;
 };
 FUNC_CB_C(login)
 {
     RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\data.html");
-    send((*request).addr.socket, p->data.data, p->data.length, 0);
-    close_socket((*request).addr.socket);
+    return p->data.data;
 };
 FUNC_CB_C(test)
 {
-    char *html = "HTTP/1.1 200 OK \r\n\r\n<h1 style='text-align:center;'>Hello,World</h1>\r\n \0\0\0";
-    send((*request).addr.socket, html, strlen(html), 0);
-    close_socket((*request).addr.socket);
+    char *html = "<h1 style='text-align:center;'>Hello,World</h1>";
+    return html;
 };
 
 int main(int argc, char const *argv[])
