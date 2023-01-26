@@ -30,7 +30,7 @@ public:
     appweb(int UTCoffset, unsigned int port, size_t MAXCONN);
     ~appweb();
 
-    int set_root_dict_func(func_cb func, int req_Type);
+    int set_root_dict_func(func_cb func, int req_Type,char *mime_type);
     int start(int flag); //此函数默认阻塞运行 flag = 0
 };
 
@@ -53,10 +53,11 @@ appweb::~appweb()
 #endif
 }
 
-int appweb::set_root_dict_func(func_cb func, int req_Type)
+int appweb::set_root_dict_func(func_cb func, int req_Type,char *mime_type)
 {
     ev.root_dict.func = func;
     ev.root_dict.req_Type = req_Type;
+    ev.root_dict.resp_mime_type = mime_type;
     return 0;
 }
 int appweb::start(int flag)
@@ -79,5 +80,4 @@ int appweb::start(int flag)
 }
 
 #endif //__cplusplus
-
 #endif //!__APPWEB__H__

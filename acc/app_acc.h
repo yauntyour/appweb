@@ -42,12 +42,12 @@ extern "C"
     (*event).tcpip.address.sin_addr.s_addr = INADDR_ANY;
     (*event).udpip.address.sin_addr.s_addr = INADDR_ANY;
 #endif
-        if (bind((*event).tcpip.socket, (const sockaddr *)&(*event).tcpip.address, sizeof((*event).tcpip.address)) == SOCKET_ERROR)
+        if (bind((*event).tcpip.socket, (const struct sockaddr *)&(*event).tcpip.address, sizeof((*event).tcpip.address)) == SOCKET_ERROR)
         {
             printf("%s: bind TCP %s:%d failed. %s\n", __func__, "localhost", (*event).port, strerror(errno));
             return -1;
         }
-        if (bind((*event).udpip.socket, (const sockaddr *)&(*event).udpip.address, sizeof((*event).udpip.address)) == SOCKET_ERROR)
+        if (bind((*event).udpip.socket, (const struct sockaddr *)&(*event).udpip.address, sizeof((*event).udpip.address)) == SOCKET_ERROR)
         {
             printf("%s: bind UDP %s:%d failed. %s\n", __func__, "localhost", (*event).port + 1, strerror(errno));
             return -1;
@@ -60,14 +60,6 @@ extern "C"
         }
 
         (*event).MAXCONNECT = MAXCONN;
-
-        (*event).root_dict.func = NULL;
-        (*event).root_dict.Name = NULL;
-        (*event).root_dict.req_Type = Type_ALL;
-
-        (*event).root_dict.list = NULL;
-        (*event).root_dict.list_length = 0;
-        (*event).root_dict.list_size = 0;
 
         signal(SIGINT, sighandler);
         signal(SIGTERM, sighandler);
@@ -97,7 +89,7 @@ extern "C"
         socklen_t sizeof_req = sizeof((*request).addr.address);
 #endif
         __Accept__:
-            (*metadata_ptr(request)).addr.socket = accept(event->tcpip.socket, (sockaddr *)&(*metadata_ptr(request)).addr.address, &sizeof_req);
+            (*metadata_ptr(request)).addr.socket = accept(event->tcpip.socket, (struct sockaddr *)&(*metadata_ptr(request)).addr.address, &sizeof_req);
             if ((*metadata_ptr(request)).addr.socket == INVALID_SOCKET)
             {
                 int err = get_error();

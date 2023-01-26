@@ -6,7 +6,7 @@
 
 typedef long long UUID_t;
 #define BUF_LEN 32 + 24 + 16
-char *getTMUTC(char *buf, int len, const char *_Format, time_t *time)
+char *UUID_getTMUTC(char *buf, int len, const char *_Format, time_t *time)
 {
     memset(buf, 0, len);
     struct tm t;
@@ -32,7 +32,7 @@ int UUID_create(unsigned char* hash,unsigned int hash_len,UUID_t *time_diff)
 
     time_t t;
     time(&t);
-    sprintf(buf, "%s %d", getTMUTC(buf, BUF_LEN, "%a %b %d %X %Y", &t), (*time_diff));
+    sprintf(buf, "%s %d", UUID_getTMUTC(buf, BUF_LEN, "%a %b %d %X %Y", &t), (*time_diff));
 
     sm3((unsigned char *)buf,BUF_LEN,hash,&hash_len);
 

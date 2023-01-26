@@ -13,7 +13,7 @@ extern "C"
 
 typedef struct IPv4_address{
     socket_t socket;
-    sockaddr_in address;
+    struct sockaddr_in address;
 } IPv4_addr_t;
 
 #ifdef __cplusplus

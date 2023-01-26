@@ -1,8 +1,6 @@
 
 # appweb (v2.3)——过渡版本
 
-# 重大更新决定：修改底层request处理机制 (v3.0)
-
 具备简单的集成性基础功能。
 <!--more-->
 模块架构：
@@ -32,42 +30,53 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
-    char *html = "HTTP/1.1 200 OK \r\n\r\n{'test':'Hello,World'}\r\n \0\0\0";
-    send((*request).addr.socket, html, strlen(html), 0);
-    close_socket((*request).addr.socket);
+    return "{'test':'Hello,World'}";
 };
 FUNC_CB_C(login)
 {
     RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\data.html");
-    send((*request).addr.socket, p->data.data, p->data.length, 0);
-    close_socket((*request).addr.socket);
+    return p->data.data;
 };
 FUNC_CB_C(test)
 {
-    char *html = "HTTP/1.1 200 OK \r\n\r\n<h1 style='text-align:center;'>Hello,World</h1>\r\n \0\0\0";
-    send((*request).addr.socket, html, strlen(html), 0);
-    close_socket((*request).addr.socket);
+    return "<h1 style='text-align:center;'>Hello,World</h1>";
 };
+FUNC_CB_C(img)
+{
+    // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
+    // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
+    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\bg.jpg");
+    FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
+    // return a string containing the result of the '\0' is the first of character
+    // 返回包含“\0”是第一个字符的结果的字符串
+    return "";
+}
 
 int main(int argc, char const *argv[])
 {
 
-    RESRC_create(&res, 1);
+    RESRC_create(&res, 2);
 
+    // open the file ptr
     RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[0]), "K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
+    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[1]), "K:\\CCXXProgram\\appweb\\out\\bg.jpg", "rb");
+    // load the file data
     RESRC_FILE_cache(10, &(res.filelist[0]));
+    RESRC_FILE_cache(10, &(res.filelist[1]));
 
     WS_Init();
     /*
+    //used in C:
     appev_t ev;
     ev.port = 10000;
     ev.UTCoffset = 8;
     ev.root_dict.func = test;
     app_event_init(&ev, 128);
     */
-    appweb app(8, 10000, 2);
+    appweb app(8, 10000, 3);
 
     /*
+    //used in C:
     Varde home_dict = Varde_def(test, Type_GET, "home", ComPath_True);
     Varde home_list[] = {
         Varde_def(login, Type_GET, "login", ComPath_True),
@@ -77,23 +86,26 @@ int main(int argc, char const *argv[])
     Varde_ZIP(&(ev.root_dict));
     Varde_ZIP(&home_dict);
     */
-    app.set_root_dict_func(test, Type_ALL);
+
+    app.set_root_dict_func(test, Type_ALL, "text/html");
 
     Varde home_list[] = {
-        Varde_def(login, Type_GET, "postTest", ComPath_True),
-        Varde_def(api, Type_POST, "api", ComPath_True),
+        Varde_def(login, Type_GET, "postTest", ComPath_True, "text/html"),
+        Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
+        Varde_def(img, Type_GET, "img", ComPath_True, "image/png"),
     };
-    Varde home_dict = {test, Type_GET, "home", home_list, 2, 2, ComPath_True};
+    Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, ComPath_True, "text/html"};
     home_dict.ZIP();
 
     app.root_dict_p->append(&home_dict);
     app.root_dict_p->ZIP();
 
     /*
-     pthread_t acc_th;
-     app_acc(&acc_th, &ev);
-     pthread_join(acc_th, NULL);
- */
+    //used in C:
+    pthread_t acc_th;
+    app_acc(&acc_th, &ev);
+    pthread_join(acc_th, NULL);
+    */
     app.start(flag_wait);
 
     WS_clean();
@@ -134,9 +146,26 @@ int main(int argc, char const *argv[])
     } Varde;
    
    //函数类型为：
+   typedef char *(*func_cb)(req_t *, bytes *);
    //利用该宏可以快速定义一个标准函数（参见example dome）
-    #define FUNC_CB_C(__name__) int __name__(req_t *request)
-   //理论上根据规范，您需要返回一个HTTP状态码检查函数执行，因为在调度器中不会检查函数的执行是否正常，这就要您在编写函数时调试完成。
+   #define FUNC_CB_C(__name__) char *__name__(req_t *req, bytes *header)
+   //显然我们可以通过bytes组件库提供的操作函数为header添加内容。
+   //但是要注意，header尚未调用bytes_create。
+   //理论上根据规范，您只需要返回页面的内容，调度器会自动写入响应流的末尾。
+   
+   //如果你要在定义的FUNC_CB里使用内容输出：请使用这个宏
+   #define FUNC_CB_OUT(__arg__...) send(req->addr.socket, "\r\n",2, 0);send(__arg__) 
+   //就像这样：
+   FUNC_CB_C(img)
+   {
+       // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
+       // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
+       RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\bg.jpg");
+       FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
+       // return a string containing the result of the '\0' is the first of character
+       // 返回包含“\0”是第一个字符的结果的字符串
+       return "";
+   }
    ```
     我们提供一个快捷注册的宏
     ```c++
@@ -197,6 +226,22 @@ typedef struct appev
 3. netcat 自行到官网下载最新版本
 
    [netcat 1.11 for Win32/Win64 (eternallybored.org)](https://eternallybored.org/misc/netcat/)
+
+# 关键的依赖库
+
+## Windows下使用appweb库看起来这样（socket 需要 wsock32.lib）
+
+```
+gcc -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lwsock32 -lpthread
+```
+
+## Linux下使用appweb库看起来是这样的
+
+```
+gcc -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lpthread
+```
+
+## 需要包含根目录下的appweb.h（C/C++完全封装）
 
 # 后续更新信息
 

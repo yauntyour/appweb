@@ -102,12 +102,22 @@ extern "C"
                             getTMUTC(time_buf, MAX_TIME_LEN, a->appev->UTCoffset, "%a %b %d %X %Y", &(metadata_ptr(a->request)->time));
                             send(metadata_ptr(a->request)->addr.socket, time_buf, strlen(time_buf), 0);
 
+                            send(metadata_ptr(a->request)->addr.socket, "\r\nContent-Type: ", 16, 0);
+                            send(metadata_ptr(a->request)->addr.socket, Temp->resp_mime_type, strlen(Temp->resp_mime_type), 0);
+                            send(metadata_ptr(a->request)->addr.socket, "\r\n", 2, 0);
+
                             char *html = a->appev->root_dict.func(metadata_ptr(a->request), metadata_ptr(buf));
+
                             if (metadata_ptr(buf)->data != NULL)
                             {
                                 send(metadata_ptr(a->request)->addr.socket, metadata_ptr(buf)->data, strlen(metadata_ptr(buf)->data), 0);
                             }
-                            send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+
+                            if (html[0] != '\0')
+                            {
+                                send(metadata_ptr(a->request)->addr.socket, "\r\n", 2, 0);
+                                send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+                            }
                         }
                         else
                         {
@@ -159,13 +169,22 @@ extern "C"
                             getTMUTC(time_buf, MAX_TIME_LEN, a->appev->UTCoffset, "%a %b %d %X %Y\r\n", &(metadata_ptr(a->request)->time));
                             send(metadata_ptr(a->request)->addr.socket, time_buf, strlen(time_buf), 0);
 
+                            send(metadata_ptr(a->request)->addr.socket, "\r\nContent-Type: ", 16, 0);
+                            send(metadata_ptr(a->request)->addr.socket, Temp->resp_mime_type, strlen(Temp->resp_mime_type), 0);
+                            send(metadata_ptr(a->request)->addr.socket, "\r\n", 2, 0);
+
                             char *html = Temp->func(metadata_ptr(a->request), metadata_ptr(buf));
 
                             if (metadata_ptr(buf)->data != NULL)
                             {
                                 send(metadata_ptr(a->request)->addr.socket, metadata_ptr(buf)->data, strlen(metadata_ptr(buf)->data), 0);
                             }
-                            send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+
+                            if (html[0] != '\0')
+                            {
+                                send(metadata_ptr(a->request)->addr.socket, "\r\n", 2, 0);
+                                send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+                            }
 
                             break;
                         }
@@ -177,13 +196,22 @@ extern "C"
                             getTMUTC(time_buf, MAX_TIME_LEN, a->appev->UTCoffset, "%a %b %d %X %Y", &(metadata_ptr(a->request)->time));
                             send(metadata_ptr(a->request)->addr.socket, time_buf, strlen(time_buf), 0);
 
+                            send(metadata_ptr(a->request)->addr.socket, "\r\nContent-Type: ", 16, 0);
+                            send(metadata_ptr(a->request)->addr.socket, Temp->resp_mime_type, strlen(Temp->resp_mime_type), 0);
+                            send(metadata_ptr(a->request)->addr.socket, "\r\n", 2, 0);
+
                             char *html = Temp->func(metadata_ptr(a->request), metadata_ptr(buf));
+
                             if (metadata_ptr(buf)->data != NULL)
                             {
                                 send(metadata_ptr(a->request)->addr.socket, metadata_ptr(buf)->data, strlen(metadata_ptr(buf)->data), 0);
                             }
-                            send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
 
+                            if (html[0] != '\0')
+                            {
+                                send(metadata_ptr(a->request)->addr.socket, "\r\n", 2, 0);
+                                send(metadata_ptr(a->request)->addr.socket, html, strlen(html), 0);
+                            }
                             break;
                         }
                         else
@@ -196,6 +224,7 @@ extern "C"
                     }
                 }
             }
+            bytes_delete(metadata_ptr(buf));
             metadata_free(buf);
         }
         *(a->i) -= 1;

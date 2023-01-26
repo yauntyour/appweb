@@ -23,7 +23,7 @@ msg = """GET / HTTP/1.1\r\nHost: localhost:10000\r\nConnection: keep-alive\r\nCa
 
 def netcat():
     i = 0
-    while i < 100:
+    while i < 1:
         i += 1
         if len(sys.argv) == 1:
             sys.argv.append(input("Host:"))
@@ -40,7 +40,8 @@ def netcat():
                 while j < int(sys.argv[4]):
                     data += client.recv(1)
                     j+=1
-            except ConnectionResetError:
+            except Exception as e:
+                print(e.message)
                 print(data)
             print(data)
             client.close()

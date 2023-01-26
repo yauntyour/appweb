@@ -38,12 +38,15 @@ void request_destroy(void *ptr)
 typedef char *(*func_cb)(req_t *, bytes *);
 
 #define FUNC_CB_C(__name__) char *__name__(req_t *req, bytes *header)
+#define FUNC_CB_OUT(__arg__...) send(req->addr.socket, "\r\n",2, 0);send(__arg__) 
+  
+
 #define ComPath_True 1
 #define ComPath_False 0
 
-#define Varde_def(func, req_Type, Name, ComPath)  \
-    {                                             \
-        func, req_Type, Name, NULL, 0, 0, ComPath \
+#define Varde_def(func, req_Type, Name, ComPath, resp_mime_type)  \
+    {                                                             \
+        func, req_Type, Name, NULL, 0, 0, ComPath, resp_mime_type \
     }
 #ifdef __cplusplus
 extern "C"
@@ -65,8 +68,10 @@ extern "C"
         int req_Type;
         char *Name; // The Name of varde
         struct varde *list;
-        size_t list_length, list_size;
+        size_t list_length;
+        size_t list_size;
         int ComPath; // Common path resolution:true or false
+        char *resp_mime_type;
 #ifdef __cplusplus
         int append(struct varde *Var)
         {
