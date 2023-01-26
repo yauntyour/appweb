@@ -16,7 +16,7 @@
 
 # 版本更新内容
 
-[updata.md](https://github.com/yauntyour/appweb/blob/master/updata_v2.2.md)
+[updata.md](https://github.com/yauntyour/appweb/blob/master/updata_version.md)
 
 ## 详细内容
 
