@@ -232,13 +232,13 @@ typedef struct appev
 ## Windows下使用appweb库看起来这样（socket 需要 wsock32.lib）
 
 ```
-gcc -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lwsock32 -lpthread
+g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lwsock32 -lpthread
 ```
 
 ## Linux下使用appweb库看起来是这样的
 
 ```
-gcc -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lpthread
+g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lpthread
 ```
 
 ## 需要包含根目录下的appweb.h（C/C++完全封装）
