@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <title>Post Test</title>
+</head>
+
+<body>
+  <p>
+    URL_INPUT: <input type="url" name="URL_INPUT" id="URL_INPUT">
+    <br>
+    JSON_INPUT: <input type="text" name="JSON_INPUT" id="JSON_INPUT">
+    <br>
+    <button type="submit" onclick="takePost({ url:url_input, body:json_input })">Take Post</button>
+  </p>
+  <br><br>
+  <p>
+    HEADERS_OUTPUT: <div id="HEADERS_OUTPUT"></div>
+    <br><br>
+    BODY_OUTPUT: <div id="BODY_OUTPUT"></div>
+  </p>
+  <script>
+    const url_input = document.querySelector("#URL_INPUT").value, // string
+      json_input = JSON.stringify(document.querySelector("#JSON_INPUT").value), // string
+      takePost = async (url, body) => { // attr all string
+      let res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: body
+      });
+      for (let key of res.headers.keys()) {
+        document.querySelector("#HEADERS_OUTPUT").innerHTML += `${key}: ${res.headers.get(key)} <br>`;
+      }
+      document.querySelector("#BODY_OUTPUT").innerHTML = await res.text();
+    };
+  </script>
+</body>
+
+</html>

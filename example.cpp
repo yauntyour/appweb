@@ -9,9 +9,13 @@ FUNC_CB_C(api)
 {
     return "{'test':'Hello,World'}";
 };
-FUNC_CB_C(login)
+FUNC_CB_C(POST_TEST)
 {
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\data.html");
+#ifdef _WIN32
+    RESRC_FILE *p = RESRC_select_path(&res, "appweb\\out\\post_test.html");
+#else
+    RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/post_test.html");
+#endif
     return p->data.data;
 };
 FUNC_CB_C(test)
@@ -22,7 +26,11 @@ FUNC_CB_C(img)
 {
     // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
     // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\bg.jpg");
+#ifdef _WIN32
+    RESRC_FILE *p = RESRC_select_path(&res, "appweb\\out\\bg.jpg");
+#else
+    RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/image.jpg");
+#endif
     FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
     // return a string containing the result of the '\0' is the first of character
     // 返回包含“\0”是第一个字符的结果的字符串
@@ -35,8 +43,13 @@ int main(int argc, char const *argv[])
     RESRC_create(&res, 2);
 
     // open the file ptr
-    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[0]), "K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
-    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[1]), "K:\\CCXXProgram\\appweb\\out\\bg.jpg", "rb");
+#ifdef _WIN32
+    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[0]), "appweb\\out\\post_test.html", "rb");
+    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[1]), "appweb\\out\\bg.jpg", "rb");
+#else
+    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[0]), "/workspaces/appweb/out/post_test.html", "rb");
+    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[1]), "/workspaces/appweb/out/image.jpg", "rb");
+#endif
     // load the file data
     RESRC_FILE_cache(10, &(res.filelist[0]));
     RESRC_FILE_cache(10, &(res.filelist[1]));
@@ -61,7 +74,7 @@ int main(int argc, char const *argv[])
 
     // used in C:
     Varde home_list[] = {
-        Varde_def(login, Type_GET, "postTest", ComPath_True, "text/html"),
+        Varde_def(POST_TEST, Type_GET, "postTest", ComPath_True, "text/html"),
         Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
         Varde_def(img, Type_GET, "img", ComPath_True, "image/png"),
     };
