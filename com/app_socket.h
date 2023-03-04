@@ -25,6 +25,7 @@ typedef SOCKET socket_t;
 #include <netdb.h>
 #include <unistd.h> // close,shutdown, write, read
 #include <string.h>
+#include <errno.h>
 
 typedef int socket_t;
 #define INVALID_SOCKET (~0)
