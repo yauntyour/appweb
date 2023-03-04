@@ -40,8 +40,9 @@ int main(int argc, char const *argv[])
     // load the file data
     RESRC_FILE_cache(10, &(res.filelist[0]));
     RESRC_FILE_cache(10, &(res.filelist[1]));
-
+#ifdef _WIN32
     WS_Init();
+#endif
     /*
     //used in C:
     appev_t ev;
@@ -82,8 +83,9 @@ int main(int argc, char const *argv[])
     pthread_join(acc_th, NULL);
     */
     app.start(flag_wait);
-
+#ifdef _WIN32
     WS_clean();
+#endif
     RESRC_FILE_CLOSE(&(res.filelist[0]));
     return 0;
 }
