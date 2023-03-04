@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
         RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[i]), file_list[i].path, file_list[i].mode);
         // load the file data
         RESRC_FILE_cache(&(res.filelist[i]));
-        LOG_LIGHT_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
+        LOG_INFO_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
     }
 #ifdef _WIN32
     WS_Init();
