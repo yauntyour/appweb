@@ -77,7 +77,7 @@ extern "C"
         return 0;
     }
 
-    int RESRC_FILE_cache(size_t timeout, RESRC_FILE *file)
+    int RESRC_FILE_cache(RESRC_FILE *file)
     {
         if (file->stat == FREE_STAT)
         {

@@ -29,17 +29,21 @@ FUNC_CB_C(img)
     return "";
 }
 
+FILE_PATH file_list[] = {
+    {"K:\\CCXXProgram\\appweb\\out\\data.html", "rb"},
+    {"K:\\CCXXProgram\\appweb\\out\\bg.jpg", "rb"}};
+
 int main(int argc, char const *argv[])
 {
 
     RESRC_create(&res, 2);
-
-    // open the file ptr
-    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[0]), "K:\\CCXXProgram\\appweb\\out\\data.html", "rb");
-    RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[1]), "K:\\CCXXProgram\\appweb\\out\\bg.jpg", "rb");
-    // load the file data
-    RESRC_FILE_cache(10, &(res.filelist[0]));
-    RESRC_FILE_cache(10, &(res.filelist[1]));
+    for (size_t i = 0; i < 2; i++)
+    {
+        // open the file ptr
+        RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[i]), file_list[i].path, file_list[i].mode);
+        // load the file data
+        RESRC_FILE_cache(&(res.filelist[i]));
+    }
 
     WS_Init();
     /*
@@ -48,7 +52,7 @@ int main(int argc, char const *argv[])
     ev.port = 10000;
     ev.UTCoffset = 8;
     app_event_init(&ev, 128);
-    
+
     ev.root_dict.func = test;
     ev.root_dict.req_Type = Type_ALL;
     ev.root_dict.resp_mime_type = "text/html";
