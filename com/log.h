@@ -23,6 +23,21 @@
     fprintf(LOG_file_p, format, __VA_ARGS__); \
     fprintf(stdout, format, __VA_ARGS__);fflush(stdout)
 
+#define LOG_INFO_NF(format, ...) \
+    fprintf(stdout, "\033[32m" format "\033[0m", __VA_ARGS__)
+#define LOG_ERR_NF(format, ...) \
+    fprintf(stdout, "\033[31m" format "\033[0m", __VA_ARGS__)
+#define LOG_WARN_NF(format, ...) \
+    fprintf(stdout, "\033[33m" format "\033[0m", __VA_ARGS__)
+#define LOG_self_NF(code, format, ...) \
+    fprintf(stdout, "\033[%dm" format "\033[0m", code, __VA_ARGS__))
+#define LOG_LIGHT_NF(format, ...) \
+    fprintf(stdout, "\033[1m" format "\033[0m", __VA_ARGS__)
+
+#define LOGFILEOUT_NF(LOG_file_p, format, ...)   \
+    fprintf(LOG_file_p, format, __VA_ARGS__); \
+    fprintf(stdout, format, __VA_ARGS__)
+
 char *getTMUTC(char *buf, int len, int UTCoffset, const char *_Format, time_t *time)
 {
     memset(buf, 0, len);

@@ -24,7 +24,8 @@ extern "C"
 
     typedef struct _FILE_PATH
     {
-        char *path, *mode;
+        char *path;
+        char *mode;
     } FILE_PATH;
 
     /*File的内容*/
@@ -162,4 +163,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif //__cplusplus
-#endif  //!__RESRC__H__
+#endif //!__RESRC__H__

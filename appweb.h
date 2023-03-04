@@ -40,6 +40,10 @@ appweb::appweb(int UTCoffset, unsigned int port, size_t MAXCONN)
     WS_Init();
 #endif
     root_dict_p = &(ev.root_dict);
+    ev.root_dict.list_length = 0;
+    ev.root_dict.list_size = 0;
+    ev.root_dict.list = NULL;
+
     ev.port = port;
     ev.UTCoffset = UTCoffset;
     app_event_init(&ev, MAXCONN);

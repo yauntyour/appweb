@@ -71,7 +71,10 @@ extern "C"
         }
         else if (result == 0)
         {
-            goto __end_rsp__;
+            close_socket(metadata_ptr(a->request)->addr.socket);
+            metadata_free(a->request);
+            free(arg);
+            pthread_exit(NULL);
         }
 
 #endif
@@ -217,7 +220,7 @@ extern "C"
                         else
                         {
                         __rsp_404__:
-                            LOG_ERR("Not Found. at %s() %d\r\n", __func__, e);
+                            LOG_ERR("Response HTTP 404 Not Found. At %s()::errcode: %d\r\n", __func__, e);
                             rsp_404(metadata_ptr(a->request));
                             break;
                         }

@@ -86,7 +86,7 @@ extern "C"
 #ifdef _WIN32
             int sizeof_req = sizeof((*(metadata_ptr(request))).addr.address);
 #else
-        socklen_t sizeof_req = sizeof((*request).addr.address);
+        socklen_t sizeof_req = sizeof((*(metadata_ptr(request))).addr.address);
 #endif
         __Accept__:
             (*metadata_ptr(request)).addr.socket = accept(event->tcpip.socket, (struct sockaddr *)&(*metadata_ptr(request)).addr.address, &sizeof_req);
