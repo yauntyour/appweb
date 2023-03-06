@@ -7,7 +7,6 @@
 
 #include "mime_type.h"
 #include "request.h"
-// #include "inc_zlib.h"
 
 #include <stdio.h>
 #include <string.h>
