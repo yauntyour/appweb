@@ -219,8 +219,21 @@ extern "C"
                         else
                         {
                         __rsp_404__:
-                            LOG_ERR("Response HTTP 404 Not Found. At %s()::errcode: %d\r\n", __func__, e);
                             rsp_404(metadata_ptr(a->request));
+                            
+                            LOG_ERR("[Appweb::rsc::%s](msg::Response HTTP 404 Not Found. At %s()::errcode: %d)\r\n", __func__, __func__, e);
+                            LOG_WARN_NF("[Appweb::rsc::%s](URL::", __func__);
+                            for (size_t i = 0; i < metadata_ptr(a->request)->url_slice_len; i++)
+                            {
+                                if (i == metadata_ptr(a->request)->url_slice_len - 1)
+                                {
+                                    LOG_WARN("/%s,mode::%s)\r\n", metadata_ptr(a->request)->url_slice[i], metadata_ptr(a->request)->req_model);
+                                }
+                                else
+                                {
+                                    LOG_WARN_NF("/%s", metadata_ptr(a->request)->url_slice[i]);
+                                }
+                            }
                             break;
                         }
                     }
