@@ -7,6 +7,7 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
+    printf("%s\r\n",req->data.data);
     return "{'test':'Hello,World'}";
 };
 
@@ -54,16 +55,8 @@ static FILE_PATH file_list[] = {
 
 int main(int argc, char const *argv[])
 {
-    LOG_LIGHT_NF("%s\n","Build application by Yauntyour (https://github.com/yauntyour) with C++");
-    RESRC_create(&res, 2);
-    for (size_t i = 0;file_list[i].path != NULL; i++)
-    {
-        // open the file ptr
-        RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[i]), file_list[i].path, file_list[i].mode);
-        // load the file data
-        RESRC_FILE_cache(&(res.filelist[i]));
-        LOG_INFO_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
-    }
+    LOG_LIGHT_NF("%s\n", "Build application by Yauntyour (https://github.com/yauntyour) with C++");
+    RESRC_load_filelist(&res, file_list, 2);
 #ifdef _WIN32
     WS_Init();
 #endif

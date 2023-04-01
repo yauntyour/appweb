@@ -114,6 +114,19 @@ extern "C"
         }
     }
 
+    int RESRC_load_filelist(RESRC *res, FILE_PATH file_list[], size_t size)
+    {
+        RESRC_create(res, size);
+        for (size_t i = 0; i < size; i++)
+        {
+            // open the file ptr
+            RESRC_FILE_OPEN(&(res->uuid_seed), &(res->filelist[i]), file_list[i].path, file_list[i].mode);
+            // load the file data
+            RESRC_FILE_cache(&(res->filelist[i]));
+            LOG_INFO_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
+        }
+    }
+
     RESRC_FILE *RESRC_select_path(RESRC *resrc, char *path)
     {
         for (size_t i = 0; i < resrc->Number; i++)

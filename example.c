@@ -6,6 +6,7 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
+    printf("%s\r\n",req->data.data);
     return "{'test':'Hello,World'}";
 };
 FUNC_CB_C(POST_TEST)
@@ -50,16 +51,8 @@ static FILE_PATH file_list[] = {
 
 int main(int argc, char const *argv[])
 {
-    LOG_LIGHT_NF("%s\n","Build application by Yauntyour (https://github.com/yauntyour) with C");
-    RESRC_create(&res, 2);
-    for (size_t i = 0;file_list[i].path != NULL; i++)
-    {
-        // open the file ptr
-        RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[i]), file_list[i].path, file_list[i].mode);
-        // load the file data
-        RESRC_FILE_cache(&(res.filelist[i]));
-        LOG_INFO_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
-    }
+    LOG_LIGHT_NF("%s\n", "Build application by Yauntyour (https://github.com/yauntyour) with C");
+    RESRC_load_filelist(&res, file_list, 2);
 #ifdef _WIN32
     WS_Init();
 #endif
@@ -69,14 +62,14 @@ int main(int argc, char const *argv[])
     ev.port = 10000;
     ev.UTCoffset = 8;
     app_event_init(&ev, 128);
-    
-    //root event
+
+    // root event
     ev.root_dict.func = test;
     ev.root_dict.req_Type = Type_ALL;
     ev.root_dict.resp_mime_type = "text/html";
     ev.root_dict.Name = NULL;
     ev.root_dict.ComPath = ComPath_False;
-    //root list
+    // root list
     ev.root_dict.list_length = 0;
     ev.root_dict.list_size = 0;
     ev.root_dict.list = NULL;

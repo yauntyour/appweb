@@ -13,7 +13,6 @@ extern "C"
     {
         void *__ptr__;
         size_t __allocated__;
-        size_t __count__;
         void (*__destruct__)(void *_ptr);
     } metadata;
 
@@ -24,8 +23,6 @@ extern "C"
 
         meta->__ptr__ = malloc(size);
         memset(meta->__ptr__, 0, size);
-
-        meta->__count__ = 0;
         meta->__destruct__ = __destruct__;
         meta->__allocated__ = size;
         return meta;
