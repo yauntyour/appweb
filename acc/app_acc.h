@@ -74,15 +74,14 @@ extern "C"
         return 0;
     }
 
-
-    void *_acc(void *arg)
+    void *tcp_acc(void *arg)
     {
         appev_t *event = (appev_t *)arg;
         LOG_LIGHT("Server start at host:[http://localhost:%d]\n", event->port);
         size_t t = 0;
         while (1)
         {
-            metadata_type(req_t *) request = (metadata_type(req_t *))metadata_alloc(sizeof(req_t),request_destroy);
+            metadata_type(req_t *) request = (metadata_type(req_t *))metadata_alloc(sizeof(req_t), request_destroy);
 #ifdef _WIN32
             int sizeof_req = sizeof((*(metadata_ptr(request))).addr.address);
 #else
@@ -120,16 +119,81 @@ extern "C"
                 }
                 else
                 {
-                    app_rsc(&t, request, event);
+                    app_rsc(&t, request, event, TCP_CONNECT);
                     t += 1;
                 }
             }
         }
         pthread_exit(NULL);
     }
+
+    void *udp_acc(void *arg)
+    {
+        appev_t *event = (appev_t *)arg;
+        LOG_LIGHT("Server start at host:[http://localhost:%d]\n", event->port);
+        size_t t = 0;
+        while (1)
+        {
+            metadata_type(req_t *) request = (metadata_type(req_t *))metadata_alloc(sizeof(req_t), request_destroy);
+#ifdef _WIN32
+            int sizeof_req = sizeof((*(metadata_ptr(request))).addr.address);
+#else
+        socklen_t sizeof_req = sizeof((*(metadata_ptr(request))).addr.address);
+#endif
+        __Accept__:
+            int recvLen = recvfrom(event->udpip.socket, NULL, 0, 0,
+                                   (struct sockaddr *)&(*metadata_ptr(request)).addr.address, &sizeof_req);
+            if (recvLen <= 0)
+            {
+                int err = get_error();
+#ifdef _WIN32
+                if (err != 10035)
+                {
+                    LOG_ERR("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+                }
+#else
+            if (err != EAGAIN)
+            {
+                LOG_ERR("%s accept Errorcode:%d %s\r\n", __func__, err, strerror(err));
+            }
+#endif
+                goto __Accept__;
+            }
+            else
+            {
+                time(&((*metadata_ptr(request)).time));
+                char buf[MAX_TIME_LEN];
+                LOG_LIGHT("[%s](%s:%d)\r\n", getTMUTC(buf, MAX_TIME_LEN, event->UTCoffset, "%a %b %d %X %Y", &((*metadata_ptr(request)).time)), inet_ntoa((*metadata_ptr(request)).addr.address.sin_addr), (*metadata_ptr(request)).addr.address.sin_port);
+            __Restart__:
+                if (t >= event->MAXCONNECT)
+                {
+                    LOG_WARN("CONNECT MAX: %d\n", event->MAXCONNECT);
+                    sendto((*metadata_ptr(request)).addr.socket, "HTTP/1.1 503\r\n", 15, MSG_WAITALL,
+                           (struct sockaddr *)&(*metadata_ptr(request)).addr.address, sizeof_req);
+                    goto __Restart__;
+                }
+                else
+                {
+                    app_rsc(&t, request, event, UDP_CONNECT);
+                    t += 1;
+                }
+            }
+        }
+        pthread_exit(NULL);
+    }
+
     int app_acc(pthread_t *th, appev_t *event)
     {
-        return pthread_create(th, NULL, _acc, event);
+        if (event->connect_type == TCP_CONNECT)
+        {
+            pthread_create(th, NULL, tcp_acc, event);
+        }
+        if (event->connect_type == UDP_CONNECT)
+        {
+            LOG_WARN("UDP HTTP is HTTP/3.0 may not support now,ensure your web browser is supported. version: %s\n", __SERVER__);
+            pthread_create(th, NULL, udp_acc, event);
+        }
+        return 0;
     }
 #ifdef __cplusplus
 };

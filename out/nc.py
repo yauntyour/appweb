@@ -4,6 +4,7 @@ import sys
 from ping3 import ping
 # -mode host port bufflen/data
 
+msg = "GET /home/postTest HTTP/1.1\r\n"
 
 def netcat():
     if len(sys.argv) == 1:
@@ -20,9 +21,6 @@ def netcat():
     while True:
         data = client.recv(int(sys.argv[4]))
         print(data)
-        msg = input()
-        if msg == "exit":
-            break
         client.sendall(msg.encode('utf-8'))
     client.close()
 def UDPclientSend():

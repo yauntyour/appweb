@@ -27,14 +27,17 @@ private:
         res;       //预留的资源线程
 public:
     Varde *root_dict_p;
-    appweb(int UTCoffset, unsigned int port, size_t MAXCONN);
+    appweb(int UTCoffset, unsigned int port, size_t MAXCONN,int connect_type = TCP_CONNECT);
     ~appweb();
 
     int set_root_dict_func(func_cb func, int req_Type,char *mime_type);
     int start(int flag); //此函数默认阻塞运行 flag = 0
 };
 
-appweb::appweb(int UTCoffset, unsigned int port, size_t MAXCONN)
+appweb::appweb(int UTCoffset, unsigned int port, size_t MAXCONN,int connect_type)
+    : ev()
+    , acc(0)
+    , res(0)
 {
 #ifdef _WIN32
     WS_Init();

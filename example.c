@@ -12,7 +12,7 @@ FUNC_CB_C(api)
 FUNC_CB_C(POST_TEST)
 {
 #ifdef _WIN32
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\post_test.html");
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\post_test.html");
 #else
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/post_test.html");
 #endif
@@ -27,7 +27,7 @@ FUNC_CB_C(img)
     // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
     // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
 #ifdef _WIN32
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\image.jpg");
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\image.jpg");
 #else
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/image.jpg");
 #endif
@@ -39,8 +39,8 @@ FUNC_CB_C(img)
 
 #ifdef _WIN32
 static FILE_PATH file_list[] = {
-    {"K:\\CCXXProgram\\appweb\\out\\post_test.html", "rb"},
-    {"K:\\CCXXProgram\\appweb\\out\\image.jpg", "rb"},
+    {"D:\\Dev\\appweb\\out\\post_test.html", "rb"},
+    {"D:\\Dev\\appweb\\out\\image.jpg", "rb"},
     {NULL, NULL}};
 #else
 static FILE_PATH file_list[] = {
@@ -56,11 +56,13 @@ int main(int argc, char const *argv[])
 #ifdef _WIN32
     WS_Init();
 #endif
-
-    // used in C:
     appev_t ev;
     ev.port = 10000;
     ev.UTCoffset = 8;
+    // UDP_CONNECT or TCP_CONNECT
+    ev.connect_type = TCP_CONNECT; // Use TCP connection
+    // ev.connect_type = UDP_CONNECT;
+
     app_event_init(&ev, 128);
 
     // root event
