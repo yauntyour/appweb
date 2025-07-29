@@ -12,10 +12,6 @@
 
 全部二次封装&集成&C++ class封装于`appweb.h`。
 
-# 版本更新内容
-
-[updata.md](https://github.com/yauntyour/appweb/blob/master/updata_version.md)
-
 ## 详细内容
 
 ### example dome
@@ -273,17 +269,10 @@ g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lwsock32 -lpthread
 g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lpthread
 ```
 
-## 需要包含根目录下的appweb.h（C/C++完全封装）
+## 只需包含根目录下的appweb.h（C/C++完全封装）即可调用此库
 
-# 后续更新信息
+**Made by yauntyour Copyright reserved**
 
-1. 加入zlib支持gzip压缩
-2. 改进RESRC资源池设计
-3. 支持HTTP2-3
-4. UDP接口开放
+e-mail:yauntyour@outlook.com
 
-### Made by yauntyour Copyright reserved
-
-### e-mail:yauntyour@outlook.com
-
-### Copyright  see the file LICENSE
+Copyright  see the file LICENSE
