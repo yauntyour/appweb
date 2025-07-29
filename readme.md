@@ -7,7 +7,7 @@
 
 - acc（接受请求）
 - rsc（响应+调度器实现）
-- RESRC（资源池）https://github.com/yauntyour/RESRC
+- RESRC（资源池）<https://github.com/yauntyour/RESRC>
 - com（中心封装和集成）
 
 全部二次封装&集成&C++ class封装于`appweb.h`。
@@ -18,7 +18,7 @@
 
 ## 详细内容
 
-### example dome：
+### example dome
 
 ```c
 #include <iostream>
@@ -142,9 +142,10 @@ int main(int argc, char const *argv[])
 }
 ```
 
-### 基本使用：
+### 基本使用
+
  Varde 的基本原理和结构————树级目录
-[![IMG-20220827-123138.jpg](https://i.postimg.cc/X7HwZKgn/IMG-20220827-123138.jpg)](https://postimg.cc/ykRJtZ5G)
+[![](tree.png)](Tree)
 
 1. 注册一个Varde，其结构为
 
@@ -195,7 +196,9 @@ int main(int argc, char const *argv[])
        return "";
    }
    ```
+
     我们提供一个快捷注册的宏
+
     ```c++
     #define Varde_def(func, req_Type, Name, ComPath)  \
         {                                             \
@@ -203,9 +206,10 @@ int main(int argc, char const *argv[])
         }
     //eg: Varde var = Varde_def(test,req_ALL,"test",ComPath_True);
     ```
+
 2. 使用`app.start(flag_wait);`执行服务。执行端会监听您提供的port。flag设置为0表示默认阻塞运行。
 
-### 相关基础信息：
+### 相关基础信息
 
 ```c++
 typedef struct appev
@@ -278,8 +282,8 @@ g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lpthread
 3. 支持HTTP2-3
 4. UDP接口开放
 
-### Made by yauntyour Copyright reserved.
+### Made by yauntyour Copyright reserved
 
 ### e-mail:yauntyour@outlook.com
 
-### Copyright  see the file LICENSE.
+### Copyright  see the file LICENSE

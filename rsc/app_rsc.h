@@ -248,6 +248,7 @@ extern "C"
         metadata_free(a->request);
         free(arg);
         pthread_exit(NULL);
+        return NULL;
     }
     int app_rsc(size_t *i, metadata_type(req_t *) request, appev_t *event)
     {

@@ -27,7 +27,7 @@ extern "C"
         (*buf).data = (byter *)calloc(size, sizeof(byter));
         (*buf).length = size;
         (*buf).offset = 0;
-        memset((*buf).data, 0, size);
+        memset(buf->data, 0, size);
         return (*buf).length;
     }
 
@@ -66,6 +66,7 @@ extern "C"
             }
             return 0;
         }
+        return -1;
     }
     extern size_t bytes_seek(bytes *buf, size_t offset)
     {

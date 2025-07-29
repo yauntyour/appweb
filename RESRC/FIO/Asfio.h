@@ -49,7 +49,7 @@ void *__read__(void *args)
     {
         rewind(asp->Stream);
         pthread_rwlock_unlock(&asp->AsfioLuck);
-        return (void *)&filedata;
+        return (void *)filedata.data; // return the data read
     }
     else
     {
@@ -106,7 +106,7 @@ extern size_t Asfio_callblack(CALLBLACK_TH th, bytes *res)
     else
     {
         fprintf(stderr, "%s\n", "Asfio Callblack function error.");
-        return NULL;
+        return 0;
     }
 }
 

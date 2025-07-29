@@ -125,6 +125,7 @@ extern "C"
             RESRC_FILE_cache(&(res->filelist[i]));
             LOG_INFO_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
         }
+        return 0;
     }
 
     RESRC_FILE *RESRC_select_path(RESRC *resrc, char *path)
@@ -136,6 +137,7 @@ extern "C"
                 return resrc->filelist + i;
             }
         }
+        return NULL;
     }
     RESRC_FILE *RESRC_select_UUID(RESRC *resrc, unsigned char UUID[32])
     {

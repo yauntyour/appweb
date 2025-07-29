@@ -14,7 +14,7 @@ FUNC_CB_C(api)
 FUNC_CB_C(POST_TEST)
 {
 #ifdef _WIN32
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\post_test.html");
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\post_test.html");
 #else
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/post_test.html");
 #endif
@@ -31,7 +31,7 @@ FUNC_CB_C(img)
     // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
     // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
 #ifdef _WIN32
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\image.jpg");
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\image.jpg");
 #else
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/image.jpg");
 #endif
@@ -43,8 +43,8 @@ FUNC_CB_C(img)
 
 #ifdef _WIN32
 static FILE_PATH file_list[] = {
-    {"K:\\CCXXProgram\\appweb\\out\\post_test.html", "rb"},
-    {"K:\\CCXXProgram\\appweb\\out\\image.jpg", "rb"},
+    {"D:\\Dev\\appweb\\out\\post_test.html", "rb"},
+    {"D:\\Dev\\appweb\\out\\image.jpg", "rb"},
     {NULL, NULL}};
 #else
 static FILE_PATH file_list[] = {
@@ -60,19 +60,7 @@ int main(int argc, char const *argv[])
 #ifdef _WIN32
     WS_Init();
 #endif
-    /*
-    //used in C:
-    appev_t ev;
-    ev.port = 10000;
-    ev.UTCoffset = 8;
-    app_event_init(&ev, 128);
 
-    ev.root_dict.func = test;
-    ev.root_dict.req_Type = Type_ALL;
-    ev.root_dict.resp_mime_type = "text/html";
-    ev.root_dict.Name = NULL;
-    ev.root_dict.ComPath = ComPath_False;
-    */
     appweb app(8, 10000, 3);
     app.set_root_dict_func(test, Type_ALL, "text/html");
 
@@ -83,22 +71,9 @@ int main(int argc, char const *argv[])
         Varde_def(img, Type_GET, "img", ComPath_True, "image/png"),
     };
     Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, ComPath_True, "text/html"};
-    /*
-    //used in C:
-    Varde_list_append(&(ev.root_dict), &home_dict);
-    Varde_ZIP(&(ev.root_dict));
-    Varde_ZIP(&home_dict);
-    */
     home_dict.ZIP();
     app.root_dict_p->append(&home_dict);
     app.root_dict_p->ZIP();
-
-    /*
-    //used in C:
-    pthread_t acc_th;
-    app_acc(&acc_th, &ev);
-    pthread_join(acc_th, NULL);
-    */
     app.start(flag_wait);
 #ifdef _WIN32
     WS_clean();

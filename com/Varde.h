@@ -95,7 +95,7 @@ extern "C"
                     temp[list_size] = *Var;
                     if (list != NULL)
                     {
-                        free(&(list));
+                        free(list);
                     }
 
                     free(list);

@@ -6,7 +6,7 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
-    printf("%s\r\n",req->data.data);
+    printf("%s\r\n", req->data.data);
     return "{'test':'Hello,World'}";
 };
 FUNC_CB_C(POST_TEST)
@@ -73,11 +73,6 @@ int main(int argc, char const *argv[])
     ev.root_dict.list_length = 0;
     ev.root_dict.list_size = 0;
     ev.root_dict.list = NULL;
-    /*
-    appweb app(8, 10000, 3);
-    app.set_root_dict_func(test, Type_ALL, "text/html");
-    */
-    // used in C:
     Varde home_list[] = {
         Varde_def(POST_TEST, Type_GET, "postTest", ComPath_True, "text/html"),
         Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
@@ -85,23 +80,13 @@ int main(int argc, char const *argv[])
     };
     Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, ComPath_True, "text/html"};
 
-    // used in C:
     Varde_list_append(&(ev.root_dict), &home_dict);
     Varde_ZIP(&(ev.root_dict));
     Varde_ZIP(&home_dict);
-    /*
-    home_dict.ZIP();
-    app.root_dict_p->append(&home_dict);
-    app.root_dict_p->ZIP();
-    */
 
-    // used in C:
     pthread_t acc_th;
     app_acc(&acc_th, &ev);
     pthread_join(acc_th, NULL);
-    /*
-    app.start(flag_wait);
-    */
 #ifdef _WIN32
     WS_clean();
 #endif
