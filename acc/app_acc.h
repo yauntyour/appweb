@@ -182,16 +182,20 @@ extern "C"
         pthread_exit(NULL);
     }
 
-    int app_acc(pthread_t *th, appev_t *event)
+    int app_acc(pthread_t *acc_th, appev_t *event)
     {
         if (event->connect_type == TCP_CONNECT)
         {
-            pthread_create(th, NULL, tcp_acc, event);
+            pthread_create(acc_th, NULL, tcp_acc, event);
         }
         if (event->connect_type == UDP_CONNECT)
         {
             LOG_WARN("UDP HTTP is HTTP/3.0 may not support now,ensure your web browser is supported. version: %s\n", __SERVER__);
-            pthread_create(th, NULL, udp_acc, event);
+            pthread_create(acc_th, NULL, udp_acc, event);
+        }
+        if (event->event_func != NULL)
+        {
+            pthread_create(&(event->event_th), NULL, event->event_func, event->arg);
         }
         return 0;
     }

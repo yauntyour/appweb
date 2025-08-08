@@ -28,7 +28,6 @@ FUNC_CB_C(test)
 
 FUNC_CB_C(img)
 {
-    // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
     // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
 #ifdef _WIN32
     RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\image.jpg");
@@ -36,9 +35,17 @@ FUNC_CB_C(img)
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/image.jpg");
 #endif
     FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
-    // return a string containing the result of the '\0' is the first of character
     // 返回包含“\0”是第一个字符的结果的字符串
     return "";
+}
+void *func(void *arg)
+{
+#ifdef _WIN32
+    system("dir");
+#else
+    system("ls -a");
+#endif
+    return NULL;
 }
 
 #ifdef _WIN32
@@ -72,6 +79,8 @@ int main(int argc, char const *argv[])
         {test, Type_GET, "index", home_list, 3, 3, COMPATH_True, "text/html"}};
     app.root_dict_p->list_append(home_dict, sizeof(home_dict) / sizeof(Varde));
     app.root_dict_p->ZIP();
+
+    app.add_event(func, NULL);
     app.start(flag_wait);
 #ifdef _WIN32
     WS_clean();

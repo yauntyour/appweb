@@ -14,7 +14,7 @@
 
 ## 详细内容
 
-### example dome
+### example.cpp dome
 
 ```c
 #include <iostream>
@@ -26,13 +26,14 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
+    printf("%s\r\n", req->data.data);
     return "{'test':'Hello,World'}";
 };
 
 FUNC_CB_C(POST_TEST)
 {
 #ifdef _WIN32
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\post_test.html");
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\post_test.html");
 #else
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/post_test.html");
 #endif
@@ -46,23 +47,30 @@ FUNC_CB_C(test)
 
 FUNC_CB_C(img)
 {
-    // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
     // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
 #ifdef _WIN32
-    RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\image.jpg");
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\image.jpg");
 #else
     RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/image.jpg");
 #endif
     FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
-    // return a string containing the result of the '\0' is the first of character
     // 返回包含“\0”是第一个字符的结果的字符串
     return "";
+}
+void *func(void *arg)
+{
+#ifdef _WIN32
+    system("dir");
+#else
+    system("ls -a");
+#endif
+    return NULL;
 }
 
 #ifdef _WIN32
 static FILE_PATH file_list[] = {
-    {"K:\\CCXXProgram\\appweb\\out\\post_test.html", "rb"},
-    {"K:\\CCXXProgram\\appweb\\out\\image.jpg", "rb"},
+    {"D:\\Dev\\appweb\\out\\post_test.html", "rb"},
+    {"D:\\Dev\\appweb\\out\\image.jpg", "rb"},
     {NULL, NULL}};
 #else
 static FILE_PATH file_list[] = {
@@ -73,58 +81,25 @@ static FILE_PATH file_list[] = {
 
 int main(int argc, char const *argv[])
 {
-    LOG_LIGHT_NF("%s\n","Build application by Yauntyour (https://github.com/yauntyour) with C++");
-    RESRC_create(&res, 2);
-    for (size_t i = 0;file_list[i].path != NULL; i++)
-    {
-        // open the file ptr
-        RESRC_FILE_OPEN(&(res.uuid_seed), &(res.filelist[i]), file_list[i].path, file_list[i].mode);
-        // load the file data
-        RESRC_FILE_cache(&(res.filelist[i]));
-        LOG_LIGHT_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
-    }
+    LOG_LIGHT_NF("%s\n", "Build application by Yauntyour (https://github.com/yauntyour) with C++");
+    RESRC_load_filelist(&res, file_list, 2);
 #ifdef _WIN32
     WS_Init();
 #endif
-    /*
-    //used in C:
-    appev_t ev;
-    ev.port = 10000;
-    ev.UTCoffset = 8;
-    app_event_init(&ev, 128);
-
-    ev.root_dict.func = test;
-    ev.root_dict.req_Type = Type_ALL;
-    ev.root_dict.resp_mime_type = "text/html";
-    ev.root_dict.Name = NULL;
-    ev.root_dict.ComPath = COMPATH_False;
-    */
     appweb app(8, 10000, 3);
     app.set_root_dict_func(test, Type_ALL, "text/html");
-
-    // used in C:
     Varde home_list[] = {
         Varde_def(POST_TEST, Type_GET, "postTest", COMPATH_True, "text/html"),
         Varde_def(api, Type_POST, "api", COMPATH_True, "application/json"),
         Varde_def(img, Type_GET, "img", COMPATH_True, "image/png"),
     };
-    Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"};
-    /*
-    //used in C:
-    Varde_list_append(&(ev.root_dict), &home_dict);
-    Varde_ZIP(&(ev.root_dict));
-    Varde_ZIP(&home_dict);
-    */
-    home_dict.ZIP();
-    app.root_dict_p->append(&home_dict);
+    Varde home_dict[] = {
+        {test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"},
+        {test, Type_GET, "index", home_list, 3, 3, COMPATH_True, "text/html"}};
+    app.root_dict_p->list_append(home_dict, sizeof(home_dict) / sizeof(Varde));
     app.root_dict_p->ZIP();
 
-    /*
-    //used in C:
-    pthread_t acc_th;
-    app_acc(&acc_th, &ev);
-    pthread_join(acc_th, NULL);
-    */
+    app.add_event(func, NULL);
     app.start(flag_wait);
 #ifdef _WIN32
     WS_clean();
@@ -138,6 +113,123 @@ int main(int argc, char const *argv[])
 }
 ```
 
+### example.c dome
+
+```c
+#include <stdio.h>
+#include <time.h>
+#include "appweb.h"
+
+static RESRC res;
+
+FUNC_CB_C(api)
+{
+    printf("%s\r\n", req->data.data);
+    return "{'test':'Hello,World'}";
+};
+FUNC_CB_C(POST_TEST)
+{
+#ifdef _WIN32
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\post_test.html");
+#else
+    RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/post_test.html");
+#endif
+    return p->data.data;
+};
+FUNC_CB_C(test)
+{
+    return "<h1 style='text-align:center;'>Hello,World</h1>";
+};
+FUNC_CB_C(img)
+{
+    // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
+#ifdef _WIN32
+    RESRC_FILE *p = RESRC_select_path(&res, "D:\\Dev\\appweb\\out\\image.jpg");
+#else
+    RESRC_FILE *p = RESRC_select_path(&res, "/workspaces/appweb/out/image.jpg");
+#endif
+    FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
+    // 返回包含“\0”是第一个字符的结果的字符串
+    return "";
+}
+
+void *func(void *arg)
+{
+#ifdef _WIN32
+    system("dir");
+#else
+    system("ls -a");
+#endif
+    return NULL;
+}
+
+#ifdef _WIN32
+static FILE_PATH file_list[] = {
+    {"D:\\Dev\\appweb\\out\\post_test.html", "rb"},
+    {"D:\\Dev\\appweb\\out\\image.jpg", "rb"},
+    {NULL, NULL}};
+#else
+static FILE_PATH file_list[] = {
+    {"/workspaces/appweb/out/post_test.html", "rb"},
+    {"/workspaces/appweb/out/image.jpg", "rb"},
+    {NULL, NULL}};
+#endif //_WIN32
+
+int main(int argc, char const *argv[])
+{
+    LOG_LIGHT_NF("%s\n", "Build application by Yauntyour (https://github.com/yauntyour) with C");
+    RESRC_load_filelist(&res, file_list, 2);
+#ifdef _WIN32
+    WS_Init();
+#endif
+    appev_t ev;
+    ev.port = 10000;
+    ev.UTCoffset = 8;
+    // UDP_CONNECT or TCP_CONNECT
+    ev.connect_type = TCP_CONNECT; // Use TCP connection
+    // ev.connect_type = UDP_CONNECT;
+
+    app_event_init(&ev, 128);
+
+    // root event
+    set_root_dict_func(&ev, test, Type_ALL, "text/html");
+    // root list
+    ev.root_dict.list_length = 0;
+    ev.root_dict.list_size = 0;
+    ev.root_dict.list = NULL;
+
+    Varde home_list[] = {
+        Varde_def(POST_TEST, Type_GET, "postTest", COMPATH_True, "text/html"),
+        Varde_def(api, Type_POST, "api", COMPATH_True, "application/json"),
+        Varde_def(img, Type_GET, "img", COMPATH_True, "image/png"),
+    };
+    Varde home_dict[] = {
+        {test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"},
+        {test, Type_GET, "index", home_list, 3, 3, COMPATH_True, "text/html"}};
+
+    Varde_list_append(&(ev.root_dict), home_dict, sizeof(home_dict) / sizeof(Varde));
+    Varde_ZIP(&(ev.root_dict));
+
+    // set a event func out of server
+    ev.event_func = func;
+
+    pthread_t acc_th;
+    app_acc(&acc_th, &ev);
+    pthread_join(acc_th, NULL);
+#ifdef _WIN32
+    WS_clean();
+#endif
+    for (size_t i = 0; file_list[i].path == NULL; i++)
+    {
+        RESRC_free(&(res.filelist[i]));
+        RESRC_FILE_CLOSE(&(res.filelist[i]));
+    }
+    return 0;
+}
+```
+
+
+
 ### 基本使用
 
  Varde 的基本原理和结构————树级目录
@@ -146,29 +238,32 @@ int main(int argc, char const *argv[])
 1. 注册一个Varde，其结构为
 
    ```C
-    /*
-        necessary arg:
-            char* Name -A node's Name;
-            func_cb func -A deal by function;
-            int req_Type -request model;
-            struct varde *list -A node list this node;
-            size_t list_length, list_size -The list's length & size;
-            int ComPath -Common path resolution:true or false;
-        if req_model == -1,it will disable this Varde;
-    */
-    typedef struct varde
-    {
-        func_cb func;
-        int req_Type;
-        char *Name; // The Name of varde
-        struct varde *list;
-        size_t list_length, list_size;
-        int ComPath; // Common path resolution:true or false
-    #ifdef __cplusplus
-        int append(struct varde *Var);
-        int ZIP()
-    #endif //__cplusplus
-    } Varde;
+   /*
+           necessary arg:
+               char* Name :node's Name;
+               func_cb func :A deal by function;
+               int req_Type :request model;
+               struct varde *list :A node list this node;
+               size_t list_length, list_size :The list's length & size;
+               int ComPath :Common path resolution:true or false;
+           if req_model == -1,it will disable this Varde;
+          */
+       typedef struct varde
+       {
+           func_cb func;
+           int req_Type;
+           char *Name; // The Name of varde
+           struct varde *list;
+           size_t list_length;
+           size_t list_size;
+           int ComPath; // Common path resolution:true or false
+           char *resp_mime_type;
+   #ifdef __cplusplus
+           int append(struct varde *Var);
+           int ZIP();
+           int list_append(struct varde *dict, size_t len);
+   #endif //__cplusplus
+       } Varde;
    
    //函数类型为：
    typedef char *(*func_cb)(req_t *, bytes *);
@@ -183,11 +278,9 @@ int main(int argc, char const *argv[])
    //就像这样：
    FUNC_CB_C(img)
    {
-       // Inside the func to use send() need use FUNC_CB_HTML_OUT because need a "\r\n" character to terminate the header
        // 在func内部使用send（）需要使用func_CB_OUT，因为需要一个“\r\n”字符来终止标头
        RESRC_FILE *p = RESRC_select_path(&res, "K:\\CCXXProgram\\appweb\\out\\bg.jpg");
        FUNC_CB_OUT(req->addr.socket, p->data.data, p->data.length, 0);
-       // return a string containing the result of the '\0' is the first of character
        // 返回包含“\0”是第一个字符的结果的字符串
        return "";
    }
@@ -203,7 +296,42 @@ int main(int argc, char const *argv[])
     //eg: Varde var = Varde_def(test,req_ALL,"test",COMPATH_True);
     ```
 
+   同时可以使用`append(struct varde *Var)`与`list_append(struct varde *dict, size_t len)`函数便捷地添加Varde节点或是直接追加Varde列表。
+
+   ```c++
+   app.set_root_dict_func(test, Type_ALL, "text/html");
+   Varde home_list[] = {
+   	Varde_def(POST_TEST, Type_GET, "postTest", COMPATH_True, "text/html"),
+       Varde_def(api, Type_POST, "api", COMPATH_True, "application/json"),
+       Varde_def(img, Type_GET, "img", COMPATH_True, "image/png"),
+   };
+   Varde home_dict[] = {
+      	{test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"},
+       {test, Type_GET, "index", home_list, 3, 3, COMPATH_True, "text/html"}};
+   app.root_dict_p->list_append(home_dict, sizeof(home_dict) / sizeof(Varde));//追加列
+   app.root_dict_p->ZIP();//删除冗余内存
+   ```
+
+   
+
 2. 使用`app.start(flag_wait);`执行服务。执行端会监听您提供的port。flag设置为0表示默认阻塞运行。
+
+3. 使用`app.add_event(func, NULL);`为程序添加额外的事件服务函数。
+
+   ```c++
+   void *func(void *arg)
+   {
+   #ifdef _WIN32
+       system("dir");
+   #else
+       system("ls -a");
+   #endif
+       return NULL;
+   }
+   app.add_event(func, NULL);//添加事件函数，会在acc线程执行后执行此线程
+   ```
+
+   可以在开启服务器的同时，额外注册一个线程执行自定义的内容，例如启动SQL服务、Python脚本等等。
 
 ### 相关基础信息
 
@@ -213,9 +341,12 @@ typedef struct appev
     IPv4_addr_t tcpip, udpip;
     unsigned int port;
     Varde root_dict;
-    req_t *Thread_queue;
-    size_t Thread_queue_length;
+    size_t MAXCONNECT;
     int UTCoffset;
+    int connect_type; // 0:TCP, 1:UDP, 2:ALL
+    void *(*event_func)(void *arg);//事件注册函数
+    void *arg;//参数指针
+    pthread_t event_th;
 } appev_t;
 ```
 
@@ -251,13 +382,9 @@ typedef struct appev
    #argv format: -mode host port recvbufflen
    ```
 
-3. netcat 自行到官网下载最新版本
-
-   [netcat 1.11 for Win32/Win64 (eternallybored.org)](https://eternallybored.org/misc/netcat/)
-
 # 关键的依赖库
 
-## Windows下使用appweb库看起来这样（socket 需要 wsock32.lib）
+## Windows下使用appweb库看起来这样（Windows下socket 需要 wsock32.lib）
 
 ```
 g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lwsock32 -lpthread
@@ -271,8 +398,8 @@ g++ -g XXXX.cpp -o XXXX -fexec-charset=UTF-8 -lpthread
 
 ## 只需包含根目录下的appweb.h（C/C++完全封装）即可调用此库
 
-**Made by yauntyour Copyright reserved**
+### **Made by yauntyour Copyright reserved**
 
-e-mail:yauntyour@outlook.com
+### e-mail:yauntyour@outlook.com
 
-Copyright  see the file LICENSE
+### Copyright  see the file LICENSE

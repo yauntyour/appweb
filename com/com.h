@@ -27,6 +27,9 @@ typedef struct appev
     size_t MAXCONNECT;
     int UTCoffset;
     int connect_type; // 0:TCP, 1:UDP, 2:ALL
+    void *(*event_func)(void *arg);
+    void *arg;
+    pthread_t event_th;
 } appev_t;
 
 typedef struct __search__arg

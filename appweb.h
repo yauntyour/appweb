@@ -30,12 +30,13 @@ public:
     appweb(int UTCoffset, unsigned int port, size_t MAXCONN, int connect_type = TCP_CONNECT);
     ~appweb();
 
+    int add_event(void *(*event_func)(void *arg),
+                  void *arg);
     int set_root_dict_func(func_cb func, int req_Type, char *mime_type);
     int start(int flag); // 此函数默认阻塞运行 flag = 0
 };
 
 appweb::appweb(int UTCoffset, unsigned int port, size_t MAXCONN, int connect_type)
-    : ev(), acc(0), res(0)
 {
 #ifdef _WIN32
     WS_Init();
@@ -65,6 +66,8 @@ int appweb::set_root_dict_func(func_cb func, int req_Type, char *mime_type)
     ev.root_dict.resp_mime_type = mime_type;
     ev.root_dict.Name = NULL;
     ev.root_dict.ComPath = COMPATH_False;
+    ev.event_func = NULL;
+    ev.arg = NULL;
     return 0;
 }
 int appweb::start(int flag)
@@ -85,6 +88,13 @@ int appweb::start(int flag)
     }
     return 0;
 }
+int appweb::add_event(void *(*event_func)(void *arg), void *arg)
+{
+    ev.event_func = event_func;
+    ev.arg = arg;
+    return 0;
+}
+
 #else
 int set_root_dict_func(appev_t *ev, func_cb func, int req_Type, char *mime_type)
 {
@@ -93,6 +103,8 @@ int set_root_dict_func(appev_t *ev, func_cb func, int req_Type, char *mime_type)
     ev->root_dict.resp_mime_type = mime_type;
     ev->root_dict.Name = NULL;
     ev->root_dict.ComPath = COMPATH_False;
+    ev->event_func = NULL;
+    ev->arg = NULL;
     return 0;
 }
 #endif //__cplusplus
