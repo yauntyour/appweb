@@ -77,7 +77,7 @@ int app_tcp(__search__arg_t *a, int *result, int *e)
                     }
                     else if (j == Temp->list_length - 1)
                     {
-                        if (Temp->ComPath == ComPath_True)
+                        if (Temp->ComPath == COMPATH_True)
                         {
                             (*e) = 4;
                             goto __rsp__;

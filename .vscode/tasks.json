@@ -17,8 +17,6 @@
                 "D:\\x64\\msys2\\mingw64\\lib",*/
                 "-lpthread",
                 "-lwsock32",
-
-
             ],
             "options": {
                 "cwd": "${workspaceFolder}\\out\\"

@@ -66,25 +66,23 @@ int main(int argc, char const *argv[])
     app_event_init(&ev, 128);
 
     // root event
-    ev.root_dict.func = test;
-    ev.root_dict.req_Type = Type_ALL;
-    ev.root_dict.resp_mime_type = "text/html";
-    ev.root_dict.Name = NULL;
-    ev.root_dict.ComPath = ComPath_False;
+    set_root_dict_func(&ev, test, Type_ALL, "text/html");
     // root list
     ev.root_dict.list_length = 0;
     ev.root_dict.list_size = 0;
     ev.root_dict.list = NULL;
-    Varde home_list[] = {
-        Varde_def(POST_TEST, Type_GET, "postTest", ComPath_True, "text/html"),
-        Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
-        Varde_def(img, Type_GET, "img", ComPath_True, "image/png"),
-    };
-    Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, ComPath_True, "text/html"};
 
-    Varde_list_append(&(ev.root_dict), &home_dict);
+    Varde home_list[] = {
+        Varde_def(POST_TEST, Type_GET, "postTest", COMPATH_True, "text/html"),
+        Varde_def(api, Type_POST, "api", COMPATH_True, "application/json"),
+        Varde_def(img, Type_GET, "img", COMPATH_True, "image/png"),
+    };
+    Varde home_dict[] = {
+        {test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"},
+        {test, Type_GET, "index", home_list, 3, 3, COMPATH_True, "text/html"}};
+
+    Varde_list_append(&(ev.root_dict), home_dict, sizeof(home_dict) / sizeof(Varde));
     Varde_ZIP(&(ev.root_dict));
-    Varde_ZIP(&home_dict);
 
     pthread_t acc_th;
     app_acc(&acc_th, &ev);

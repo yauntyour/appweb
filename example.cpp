@@ -63,13 +63,14 @@ int main(int argc, char const *argv[])
     appweb app(8, 10000, 3);
     app.set_root_dict_func(test, Type_ALL, "text/html");
     Varde home_list[] = {
-        Varde_def(POST_TEST, Type_GET, "postTest", ComPath_True, "text/html"),
-        Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
-        Varde_def(img, Type_GET, "img", ComPath_True, "image/png"),
+        Varde_def(POST_TEST, Type_GET, "postTest", COMPATH_True, "text/html"),
+        Varde_def(api, Type_POST, "api", COMPATH_True, "application/json"),
+        Varde_def(img, Type_GET, "img", COMPATH_True, "image/png"),
     };
-    Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, ComPath_True, "text/html"};
-    home_dict.ZIP();
-    app.root_dict_p->append(&home_dict);
+    Varde home_dict[] = {
+        {test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"},
+        {test, Type_GET, "index", home_list, 3, 3, COMPATH_True, "text/html"}};
+    app.root_dict_p->list_append(home_dict, sizeof(home_dict) / sizeof(Varde));
     app.root_dict_p->ZIP();
     app.start(flag_wait);
 #ifdef _WIN32

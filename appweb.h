@@ -13,7 +13,7 @@
 
 #ifndef __RESRC__H__
 #include "RESRC/RESRC.h"
-#endif  //__RESRC__H__
+#endif //__RESRC__H__
 
 #define flag_wait 0
 
@@ -23,21 +23,19 @@ class appweb
 {
 private:
     appev_t ev;
-    pthread_t acc, //响应线程
-        res;       //预留的资源线程
+    pthread_t acc, // 响应线程
+        res;       // 预留的资源线程
 public:
     Varde *root_dict_p;
-    appweb(int UTCoffset, unsigned int port, size_t MAXCONN,int connect_type = TCP_CONNECT);
+    appweb(int UTCoffset, unsigned int port, size_t MAXCONN, int connect_type = TCP_CONNECT);
     ~appweb();
 
-    int set_root_dict_func(func_cb func, int req_Type,char *mime_type);
-    int start(int flag); //此函数默认阻塞运行 flag = 0
+    int set_root_dict_func(func_cb func, int req_Type, char *mime_type);
+    int start(int flag); // 此函数默认阻塞运行 flag = 0
 };
 
-appweb::appweb(int UTCoffset, unsigned int port, size_t MAXCONN,int connect_type)
-    : ev()
-    , acc(0)
-    , res(0)
+appweb::appweb(int UTCoffset, unsigned int port, size_t MAXCONN, int connect_type)
+    : ev(), acc(0), res(0)
 {
 #ifdef _WIN32
     WS_Init();
@@ -60,11 +58,13 @@ appweb::~appweb()
 #endif
 }
 
-int appweb::set_root_dict_func(func_cb func, int req_Type,char *mime_type)
+int appweb::set_root_dict_func(func_cb func, int req_Type, char *mime_type)
 {
     ev.root_dict.func = func;
     ev.root_dict.req_Type = req_Type;
     ev.root_dict.resp_mime_type = mime_type;
+    ev.root_dict.Name = NULL;
+    ev.root_dict.ComPath = COMPATH_False;
     return 0;
 }
 int appweb::start(int flag)
@@ -85,6 +85,15 @@ int appweb::start(int flag)
     }
     return 0;
 }
-
+#else
+int set_root_dict_func(appev_t *ev, func_cb func, int req_Type, char *mime_type)
+{
+    ev->root_dict.func = func;
+    ev->root_dict.req_Type = req_Type;
+    ev->root_dict.resp_mime_type = mime_type;
+    ev->root_dict.Name = NULL;
+    ev->root_dict.ComPath = COMPATH_False;
+    return 0;
+}
 #endif //__cplusplus
 #endif //!__APPWEB__H__

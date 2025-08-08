@@ -97,18 +97,18 @@ int main(int argc, char const *argv[])
     ev.root_dict.req_Type = Type_ALL;
     ev.root_dict.resp_mime_type = "text/html";
     ev.root_dict.Name = NULL;
-    ev.root_dict.ComPath = ComPath_False;
+    ev.root_dict.ComPath = COMPATH_False;
     */
     appweb app(8, 10000, 3);
     app.set_root_dict_func(test, Type_ALL, "text/html");
 
     // used in C:
     Varde home_list[] = {
-        Varde_def(POST_TEST, Type_GET, "postTest", ComPath_True, "text/html"),
-        Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
-        Varde_def(img, Type_GET, "img", ComPath_True, "image/png"),
+        Varde_def(POST_TEST, Type_GET, "postTest", COMPATH_True, "text/html"),
+        Varde_def(api, Type_POST, "api", COMPATH_True, "application/json"),
+        Varde_def(img, Type_GET, "img", COMPATH_True, "image/png"),
     };
-    Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, ComPath_True, "text/html"};
+    Varde home_dict = {test, Type_GET, "home", home_list, 3, 3, COMPATH_True, "text/html"};
     /*
     //used in C:
     Varde_list_append(&(ev.root_dict), &home_dict);
@@ -200,7 +200,7 @@ int main(int argc, char const *argv[])
         {                                             \
             func, req_Type, Name, NULL, 0, 0, ComPath \
         }
-    //eg: Varde var = Varde_def(test,req_ALL,"test",ComPath_True);
+    //eg: Varde var = Varde_def(test,req_ALL,"test",COMPATH_True);
     ```
 
 2. 使用`app.start(flag_wait);`执行服务。执行端会监听您提供的port。flag设置为0表示默认阻塞运行。
