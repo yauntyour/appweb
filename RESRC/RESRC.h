@@ -123,7 +123,7 @@ extern "C"
             RESRC_FILE_OPEN(&(res->uuid_seed), &(res->filelist[i]), file_list[i].path, file_list[i].mode);
             // load the file data
             RESRC_FILE_cache(&(res->filelist[i]));
-            LOG_INFO_NF("[RESRC::Load_file](path::%s,mode::%s)\n", file_list[i].path, file_list[i].mode);
+            fprintf(stdout, "\033[32m[RESRC::Load_file](path::%s,mode::%s)\n\033[0m", file_list[i].path, file_list[i].mode);
         }
         return 0;
     }

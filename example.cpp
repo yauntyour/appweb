@@ -7,7 +7,7 @@ static RESRC res;
 
 FUNC_CB_C(api)
 {
-    printf("%s\r\n",req->data.data);
+    printf("%s\r\n", req->data.data);
     return "{'test':'Hello,World'}";
 };
 
@@ -60,11 +60,8 @@ int main(int argc, char const *argv[])
 #ifdef _WIN32
     WS_Init();
 #endif
-
     appweb app(8, 10000, 3);
     app.set_root_dict_func(test, Type_ALL, "text/html");
-
-    // used in C:
     Varde home_list[] = {
         Varde_def(POST_TEST, Type_GET, "postTest", ComPath_True, "text/html"),
         Varde_def(api, Type_POST, "api", ComPath_True, "application/json"),
